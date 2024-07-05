@@ -173,6 +173,20 @@ class Events:
             wrapper=lambda func, c, *args: func(c, *[float(a) for a in args])
         )
 
+        # changed_here
+        self.double_click = JSEmitter(chart, f'subscribe_double_click{salt}',
+            lambda o: chart.run_script(f'''
+            let doubleClickHandler{salt} = (param) => {{
+                if (!param.point) return;
+                const time = {chart.id}.chart.timeScale().coordinateToTime(param.point.x)
+                const price = {chart.id}.series.coordinateToPrice(param.point.y);
+                window.callbackFunction(`subscribe_double_click{salt}_~_${{time}};;;${{price}}`)
+            }}
+            {chart.id}.chart.subscribeDblClick(doubleClickHandler{salt})
+            '''),
+            wrapper=lambda func, c, *args: func(c, *[float(a) for a in args])
+        )
+
 class BulkRunScript:
     def __init__(self, script_func):
         self.enabled = False
