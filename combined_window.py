@@ -44,6 +44,8 @@ class PolygonQChart(QtChart):
         self.topbar.textbox('symbol')
         self.topbar.switcher('timeframe', timeframe_options, func=self._on_timeframe_selection)
         self.topbar.switcher('security', security_options, func=self._on_security_selection)
+
+        self.topbar.textbox('quantity', '1', func=self._on_quantity_textbox)
         
         # Run initial script
         # self.run_script(f'''
@@ -66,6 +68,12 @@ class PolygonQChart(QtChart):
         {self.id}.search.window.style.display = "flex"
         {self.id}.search.box.focus()
         ''')
+    
+    def get_current_symbol(self):
+        return self.topbar['symbol'].value
+    
+    def get_current_quantity(self):
+        return self.topbar['quantity'].value
 
     # same method
     async def _polygon(self, symbol):
@@ -112,6 +120,12 @@ class PolygonQChart(QtChart):
     async def _on_security_selection(self, chart):
         print("Security selection changed")
         self.precision(5 if chart.topbar['security'].value == 'Forex' else 2)
+
+    async def _on_quantity_textbox(self, chart):
+        print("Quantity textbox changed")
+        quantity = chart.topbar['quantity'].value
+        if quantity:
+            print(f"Quantity: {quantity}")
 
     def _convert_timeframe(self, timeframe):
         spans = {

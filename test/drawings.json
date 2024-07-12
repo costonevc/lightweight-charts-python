@@ -2,8 +2,7 @@
     "SYM": [
         {
             "type": "Box",
-            "points":
-            [
+            "points": [
                 {
                     "time": 1675036800,
                     "logical": 2928,
@@ -37,6 +36,46 @@
             "options": {
                 "color": "#FFF",
                 "style": 0
+            }
+        }
+    ],
+    "TSLA": [
+        {
+            "type": "HorizontalLine",
+            "points": [
+                {
+                    "time": 1685120100,
+                    "logical": 1716,
+                    "price": 192.04724788549123
+                }
+            ],
+            "options": {
+                "lineColor": "#1E80F0",
+                "lineStyle": 0,
+                "width": 4,
+                "time": 1685120100,
+                "logical": 1716,
+                "price": 195.98192582953806
+            }
+        },
+        {
+            "type": "TrendLine",
+            "points": [
+                {
+                    "time": 1685115900,
+                    "logical": 1702,
+                    "price": 192.7282498373455
+                },
+                {
+                    "time": 1685127900,
+                    "logical": 1742,
+                    "price": 196.5115940143136
+                }
+            ],
+            "options": {
+                "lineColor": "#1E80F0",
+                "lineStyle": 0,
+                "width": 4
             }
         }
     ]

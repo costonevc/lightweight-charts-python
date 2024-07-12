@@ -11,7 +11,7 @@ except ImportError:
 
 try:
     using_pyside6 = False
-    from PyQt5.QtWebEngineWidgets import QWebEngineView
+    from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage
     from PyQt5.QtWebChannel import QWebChannel
     from PyQt5.QtCore import QObject, pyqtSlot as Slot, QUrl, QTimer
 except ImportError:
@@ -76,6 +76,11 @@ class WxChart(abstract.AbstractChart):
     def get_webview(self):
         return self.webview
 
+#changed_here: rewrite javaScriptConsoleMessage method, to print the message in the console
+class CustomWebEnginePage(QWebEnginePage):
+    def javaScriptConsoleMessage(self, level, message, line, sourceID):
+        print("JS Console:", message, "Line:", line, "Source:", sourceID)
+        super().javaScriptConsoleMessage(level, message, line, sourceID) 
 
 class QtChart(abstract.AbstractChart):
     def __init__(self, widget=None, inner_width: float = 1.0, inner_height: float = 1.0,
@@ -83,6 +88,10 @@ class QtChart(abstract.AbstractChart):
         if QWebEngineView is None:
             raise ModuleNotFoundError('QWebEngineView was not found, and must be installed to use QtChart.')
         self.webview = QWebEngineView(widget)
+        #changed_here: replace QWebEnginePage with CustomWebEnginePage
+        custom_page = CustomWebEnginePage(self.webview)
+        self.webview.setPage(custom_page)
+
         super().__init__(abstract.Window(self.webview.page().runJavaScript, 'window.pythonObject.callback'),
                          inner_width, inner_height, scale_candles_only, toolbox)
 
