@@ -1,8 +1,8 @@
 from PyQt5.QtWidgets import QWidget, QApplication
-from PyQt5.QtWebEngineWidgets import QWebEngineView
+from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage
 from PyQt5.QtWebChannel import QWebChannel
 from PyQt5.QtCore import QObject, pyqtSlot as Slot, QUrl, QTimer
-from lightweight_charts.widgets import QtChart
+# from lightweight_charts.widgets import QtChart
 from lightweight_charts import abstract
 from lightweight_charts.util import parse_event_message
 import asyncio
@@ -11,6 +11,75 @@ import pandas as pd
 import qasync
 import sys
 import re
+
+if QWebEngineView:
+    class Bridge(QObject):
+        def __init__(self, chart, mainwindow=None):
+            super().__init__()
+            self.win = chart.win
+            self.mainwindow = mainwindow
+            self.chart = chart
+
+        @Slot(str)
+        def callback(self, message):
+            emit_callback(self.win, message)
+            
+        @Slot(str)
+        def log_message(self, message):
+            self.mainwindow.log_message(message)
+
+        @Slot(result=str)
+        def getCurrentSymbol(self):
+            return self.chart.get_current_symbol()
+        
+        @Slot(result=str)
+        def getCurrentQuantity(self):
+            return self.chart.get_current_quantity()
+
+def emit_callback(window, string):
+    func, args = parse_event_message(window, string)
+    asyncio.create_task(func(*args)) if asyncio.iscoroutinefunction(func) else func(*args)
+
+class CustomWebEnginePage(QWebEnginePage):
+    def javaScriptConsoleMessage(self, level, message, line, sourceID):
+        print("JS Console:", message, "Line:", line, "Source:", sourceID)
+        super().javaScriptConsoleMessage(level, message, line, sourceID) 
+
+class QtChart(abstract.AbstractChart):
+    def __init__(self, widget=None, inner_width: float = 1.0, inner_height: float = 1.0,
+                 scale_candles_only: bool = False, toolbox: bool = False):
+        if QWebEngineView is None:
+            raise ModuleNotFoundError('QWebEngineView was not found, and must be installed to use QtChart.')
+        self.webview = QWebEngineView(widget)
+        custom_page = CustomWebEnginePage(self.webview)
+        self.webview.setPage(custom_page)
+
+        super().__init__(abstract.Window(self.webview.page().runJavaScript, 'window.pythonObject.callback'),
+                         inner_width, inner_height, scale_candles_only, toolbox)
+
+        self.web_channel = QWebChannel()
+        self.bridge = Bridge(self)
+        self.web_channel.registerObject('bridge', self.bridge)
+        self.webview.page().setWebChannel(self.web_channel)
+        self.webview.loadFinished.connect(lambda: self.webview.page().runJavaScript('''
+            let scriptElement = document.createElement("script")
+            scriptElement.src = 'qrc:///qtwebchannel/qwebchannel.js'
+
+            scriptElement.onload = function() {
+                var bridge = new QWebChannel(qt.webChannelTransport, function(channel) {
+                    var pythonObject = channel.objects.bridge
+                    window.pythonObject = pythonObject
+                })
+            }
+
+            document.head.appendChild(scriptElement)
+
+        '''))
+        self.webview.loadFinished.connect(lambda: QTimer.singleShot(200, self.win.on_js_load))
+        self.webview.load(QUrl.fromLocalFile(abstract.INDEX))
+
+
+    def get_webview(self): return self.webview
 
 class PolygonQChart(QtChart):
     def __init__(self, api_key: str, widget: QWidget = None, live: bool = False, num_bars: int = 200,
@@ -74,6 +143,10 @@ class PolygonQChart(QtChart):
     
     def get_current_quantity(self):
         return self.topbar['quantity'].value
+
+    def init_bridge(self, mainwindow):
+        self.bridge = Bridge(self, mainwindow)
+        self.web_channel.registerObject('bridge', self.bridge)
 
     # same method
     async def _polygon(self, symbol):

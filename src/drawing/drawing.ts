@@ -127,6 +127,21 @@ export abstract class Drawing extends PluginBase {
         }
     }
 
+    public static async _addEventToPoint(param: MouseEventParams, series: ISeriesApi<SeriesType>) {
+        if (!series || !param.point || !param.logical) return null;
+        const barPrice = series.coordinateToPrice(param.point.y);
+        if (barPrice == null) return null;
+        const quantity = await window.pythonObject.getCurrentQuantity();
+        const ticker = await window.pythonObject.getCurrentSymbol();
+        return {
+            time: param.time || null,
+            logical: param.logical,
+            price: barPrice.valueOf(),
+            quantity: quantity,
+            ticker: ticker
+        }
+    }
+
     protected static _getDiff(p1: Point, p2: Point): DiffPoint {
         const diff: DiffPoint = {
             logical: p1.logical-p2.logical,

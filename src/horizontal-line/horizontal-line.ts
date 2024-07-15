@@ -93,6 +93,7 @@ export class HorizontalLine extends Drawing {
 
     protected _childHandleMouseUpInteraction = () => {
         this._handleMouseUpInteraction();
+        window.pythonObject.log_message(`Moved ${this._point.quantity} of ${this._point.ticker} to price: ${this._point.price}`);
         if (!this._callbackName) return;
         window.callbackFunction(`${this._callbackName}_~_${this._point.price.toFixed(8)}`);
     }

@@ -76,8 +76,17 @@ export class ContextMenu {
                 subMenu._div.style.display = 'none'
             })
         }
-
-        let onClickDelete = () => this.drawingTool.delete(Drawing.lastHoveredObject);
+        let onClickDelete = () => {
+            if (!Drawing.lastHoveredObject) return;
+            if (Drawing.lastHoveredObject._type === 'HorizontalLine') {
+                window.pythonObject.log_message(`Removed ${Drawing.lastHoveredObject._point.quantity} of ${Drawing.lastHoveredObject._point.ticker} at price: ${Drawing.lastHoveredObject._point.price}`);
+            }
+            // window.pythonObject.log_message('Removed horizontal line');
+        
+            this.drawingTool.delete(Drawing.lastHoveredObject);
+        };
+        
+        // let onClickDelete = () => this.drawingTool.delete(Drawing.lastHoveredObject);
         this.separator()
         this.menuItem('Delete Drawing', onClickDelete)
 

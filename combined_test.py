@@ -284,90 +284,7 @@
 #         print("Application closed by user")
 
 """ replace qinputdialog with textbox """
-from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QPlainTextEdit
-from PyQt5.QtCore import QTimer
-import sys
-import asyncio
-import qasync
-from combined_window import PolygonQChart
-from click_handler_thread import ClickHandlerThread
-from functools import partial
-
-class MainWindow(QMainWindow):
-    def __init__(self, api_key):
-        super().__init__()
-        self.resize(800, 600) 
-        self.setWindowTitle("Polygon Chart with Interactive Features")
-        
-        widget = QWidget(self)
-        self.setCentralWidget(widget)
-        layout = QVBoxLayout(widget)
-
-        self.chart = PolygonQChart(api_key=api_key, widget=widget, width=800, height=550)
-        layout.addWidget(self.chart.get_webview(), 3)
-
-        self.log_widget = QPlainTextEdit()
-        self.log_widget.setReadOnly(True)
-        layout.addWidget(self.log_widget, 1)
-
-        self.horizontal_lines = {}
-        self.tolerance = 0.1
-        self.click_thread = None
-        self.click_interval = 0.3
-
-        self.chart.events.click += self.on_click
-        # self.chart.events.double_click += self.on_double_click
-
-        QTimer.singleShot(100, self.show_chart)
-
-
-    def show_chart(self):
-        self.chart.show()
-
-    def log_message(self, message):
-        self.log_widget.appendPlainText(message)
-    
-    def on_horizontal_line_move(self, window, chart, new_line):
-        self.log_message(f'Horizontal line moved to: {new_line.price}')
-
-    def handle_click(self, chart, time, price):
-        quantity = int(self.chart.get_current_quantity())
-        if quantity > 0:
-            bound_on_horizontal_line_move = partial(self.on_horizontal_line_move, self)
-            line = chart.horizontal_line(price, func=bound_on_horizontal_line_move)
-            ticker = self.chart.get_current_symbol()
-            self.horizontal_lines[line.id] = line
-            self.log_message(f"Added horizontal line at price: {price}")
-            self.log_message(f"Buy {quantity} of {ticker} at {price}")
-
-    def on_click(self, chart, time, price):
-        if self.click_thread is not None:
-            self.click_thread.terminate()
-            self.click_thread.wait()
-
-        self.click_thread = ClickHandlerThread(chart, time, price, self.click_interval)
-        self.click_thread.clicked.connect(self.handle_click)
-        self.click_thread.start()
-
-async def main(api_key):
-    app = QApplication(sys.argv)
-    qloop = qasync.QEventLoop(app)
-    asyncio.set_event_loop(qloop)
-    
-    main_window = MainWindow(api_key=api_key)
-    main_window.show()
-    
-    with qloop:
-        await qloop.run_forever()
-
-if __name__ == '__main__':
-    try:
-        asyncio.run(main(api_key="q0TtwNDqD1yz2pnD96HDLOBTMSKVh2Zl"))
-    except KeyboardInterrupt:
-        print("Application closed by user")
-
-""" toolbox test """
-# from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QPlainTextEdit, QInputDialog
+# from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QPlainTextEdit
 # from PyQt5.QtCore import QTimer
 # import sys
 # import asyncio
@@ -394,8 +311,15 @@ if __name__ == '__main__':
 #         layout.addWidget(self.log_widget, 1)
 
 #         self.horizontal_lines = {}
+#         self.tolerance = 0.1
+#         self.click_thread = None
+#         self.click_interval = 0.3
+
+#         self.chart.events.click += self.on_click
+#         # self.chart.events.double_click += self.on_double_click
 
 #         QTimer.singleShot(100, self.show_chart)
+
 
 #     def show_chart(self):
 #         self.chart.show()
@@ -403,6 +327,27 @@ if __name__ == '__main__':
 #     def log_message(self, message):
 #         self.log_widget.appendPlainText(message)
     
+#     def on_horizontal_line_move(self, window, chart, new_line):
+#         self.log_message(f'Horizontal line moved to: {new_line.price}')
+
+#     def handle_click(self, chart, time, price):
+#         quantity = int(self.chart.get_current_quantity())
+#         if quantity > 0:
+#             bound_on_horizontal_line_move = partial(self.on_horizontal_line_move, self)
+#             line = chart.horizontal_line(price, func=bound_on_horizontal_line_move)
+#             ticker = self.chart.get_current_symbol()
+#             self.horizontal_lines[line.id] = line
+#             self.log_message(f"Added horizontal line at price: {price}")
+#             self.log_message(f"Buy {quantity} of {ticker} at {price}")
+
+#     def on_click(self, chart, time, price):
+#         if self.click_thread is not None:
+#             self.click_thread.terminate()
+#             self.click_thread.wait()
+
+#         self.click_thread = ClickHandlerThread(chart, time, price, self.click_interval)
+#         self.click_thread.clicked.connect(self.handle_click)
+#         self.click_thread.start()
 
 # async def main(api_key):
 #     app = QApplication(sys.argv)
@@ -420,3 +365,58 @@ if __name__ == '__main__':
 #         asyncio.run(main(api_key="q0TtwNDqD1yz2pnD96HDLOBTMSKVh2Zl"))
 #     except KeyboardInterrupt:
 #         print("Application closed by user")
+
+""" toolbox success ver. """
+from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QPlainTextEdit, QInputDialog
+from PyQt5.QtCore import QTimer
+import sys
+import asyncio
+import qasync
+from combined_window import PolygonQChart
+# from click_handler_thread import ClickHandlerThread
+from functools import partial
+
+class MainWindow(QMainWindow):
+    def __init__(self, api_key):
+        super().__init__()
+        self.resize(800, 600) 
+        self.setWindowTitle("Polygon Chart with Interactive Features")
+        
+        widget = QWidget(self)
+        self.setCentralWidget(widget)
+        layout = QVBoxLayout(widget)
+
+        self.chart = PolygonQChart(api_key=api_key, widget=widget, width=800, height=550)
+        layout.addWidget(self.chart.get_webview(), 3)
+
+        self.log_widget = QPlainTextEdit()
+        self.log_widget.setReadOnly(True)
+        layout.addWidget(self.log_widget, 1)
+
+        self.chart.init_bridge(self)
+
+        QTimer.singleShot(100, self.show_chart)
+
+    def show_chart(self):
+        self.chart.show()
+
+    def log_message(self, message):
+        self.log_widget.appendPlainText(message)
+
+
+async def main(api_key):
+    app = QApplication(sys.argv)
+    qloop = qasync.QEventLoop(app)
+    asyncio.set_event_loop(qloop)
+    
+    main_window = MainWindow(api_key=api_key)
+    main_window.show()
+    
+    with qloop:
+        await qloop.run_forever()
+
+if __name__ == '__main__':
+    try:
+        asyncio.run(main(api_key="q0TtwNDqD1yz2pnD96HDLOBTMSKVh2Zl"))
+    except KeyboardInterrupt:
+        print("Application closed by user")

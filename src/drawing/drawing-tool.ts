@@ -8,6 +8,11 @@ import {
 import { Drawing } from './drawing';
 import { HorizontalLine } from '../horizontal-line/horizontal-line';
 
+declare global {
+    interface Window {
+        pythonObject: any; 
+    }
+}
 
 export class DrawingTool {
     private _chart: IChartApi;
@@ -85,10 +90,10 @@ export class DrawingTool {
         }
     }
 
-    private _onClick(param: MouseEventParams) {
+    private async _onClick(param: MouseEventParams) {
         if (!this._isDrawing) return;
 
-        const point = Drawing._eventToPoint(param, this._series);
+        const point = await Drawing._addEventToPoint(param, this._series);
         if (!point) return;
 
         if (this._activeDrawing == null) {
@@ -96,7 +101,12 @@ export class DrawingTool {
 
             this._activeDrawing = new this._drawingType(point, point);
             this._series.attachPrimitive(this._activeDrawing);
-            if (this._drawingType == HorizontalLine) this._onClick(param);
+            if (this._drawingType == HorizontalLine) {
+                window.pythonObject.log_message(`Added horizontal line at price: ${point.price}`);
+                window.pythonObject.log_message(`Buy ${point.quantity} of ${point.ticker} at ${point.price}`);
+                
+                this._onClick(param);
+            }
         }
         else {
             this._drawings.push(this._activeDrawing);

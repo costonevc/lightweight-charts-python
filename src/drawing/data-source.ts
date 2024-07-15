@@ -7,6 +7,8 @@ export interface Point {
     time: Time | null;
     logical: Logical;
     price: number;
+    quantity: number;
+    ticker: string;
 }
 
 export interface DiffPoint {
