@@ -182,7 +182,9 @@ class PolygonQChart(QtChart):
     # same method
     async def on_search(self, chart, searched_string):
         print(f"Search triggered for {searched_string}")
+        chart.toolbox.save_drawings_under(chart.topbar['symbol'])
         chart.topbar['symbol'].set(searched_string if await self._polygon(searched_string) else '')
+        chart.toolbox.load_drawings(chart.topbar['symbol'].value)
 
     # same method
     async def _on_timeframe_selection(self, chart):

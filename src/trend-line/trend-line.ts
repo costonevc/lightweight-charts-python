@@ -37,7 +37,7 @@ export class TrendLine extends TwoPointDrawing {
                 this._hovered = true;
                 this.requestUpdate();
                 this._subscribe("mousedown", this._handleMouseDownInteraction);
-                this._unsubscribe("mouseup", this._handleMouseDownInteraction);
+                this._unsubscribe("mouseup", this._handleMouseUpInteraction);
                 this.chart.applyOptions({handleScroll: true});
                 break;
 
