@@ -386,7 +386,7 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(widget)
         layout = QVBoxLayout(widget)
 
-        self.chart = PolygonQChart(api_key=api_key, widget=widget, width=800, height=550)
+        self.chart = PolygonQChart(api_key=api_key, widget=widget, width=800, height=550, live=True)
         layout.addWidget(self.chart.get_webview(), 3)
 
         self.log_widget = QPlainTextEdit()
@@ -417,6 +417,6 @@ async def main(api_key):
 
 if __name__ == '__main__':
     try:
-        asyncio.run(main(api_key="q0TtwNDqD1yz2pnD96HDLOBTMSKVh2Zl"))
+        asyncio.run(main(api_key="4EMv8sLwboYtrmq15pFTZdNO2aRv8yUF"))
     except KeyboardInterrupt:
         print("Application closed by user")
