@@ -12,7 +12,7 @@ import qasync
 import sys
 import re
 import pytz
-from lightweight_charts.chart import WebviewHandler
+from forex_python.converter import CurrencyCodes
 
 if QWebEngineView:
     class Bridge(QObject):
@@ -88,7 +88,7 @@ class PolygonQChart(QtChart):
     def __init__(self, api_key: str, widget: QWidget = None, live: bool = False, num_bars: int = 200,
                  end_date: str = 'now', limit: int = 5000,
                  timeframe_options: tuple = ('1min', '5min', '30min', 'D', 'W'),
-                 security_options: tuple = ('Stock', 'Option', 'Index', 'Forex', 'Crypto'),
+                #  security_options: tuple = ('Stock', 'Option', 'Index', 'Forex', 'Crypto'),
                  toolbox: bool = True, width: int = 800, height: int = 600,
                  inner_width: float = 1.0, inner_height: float = 1.0, scale_candles_only: bool = False):
         super().__init__(widget, inner_width, inner_height, scale_candles_only, toolbox)
@@ -115,7 +115,8 @@ class PolygonQChart(QtChart):
         self.crosshair(vert_visible=False, horz_visible=False)
         self.topbar.textbox('symbol')
         self.topbar.switcher('timeframe', timeframe_options, func=self._on_timeframe_selection)
-        self.topbar.switcher('security', security_options, func=self._on_security_selection)
+        # self.topbar.switcher('security', security_options, func=self._on_security_selection)
+        self.topbar.textbox('security')
 
         self.topbar.textbox('quantity', '1', func=self._on_quantity_textbox)
         
@@ -185,16 +186,16 @@ class PolygonQChart(QtChart):
     async def on_search(self, chart, searched_string):
         print(f"Search triggered for {searched_string}")
         chart.toolbox.save_drawings_under(chart.topbar['symbol'])
-        chart.topbar['symbol'].set(searched_string if await self._polygon(searched_string) else '')
+        chart.topbar['security'].set(self.identify_financial_instrument(searched_string))
+        cleaned_string = re.sub(r'[\^\-]', '', searched_string)
+        chart.topbar['symbol'].set(cleaned_string if await self._polygon(cleaned_string) else '')
+        self.precision(5 if chart.topbar['security'].value == 'Forex' else 2)
         chart.toolbox.load_drawings(chart.topbar['symbol'].value)
 
     async def _on_timeframe_selection(self, chart):
         print("Timeframe selection changed")
         await self._polygon(chart.topbar['symbol'].value) if chart.topbar['symbol'].value else None
 
-    async def _on_security_selection(self, chart):
-        print("Security selection changed")
-        self.precision(5 if chart.topbar['security'].value == 'Forex' else 2)
 
     async def _on_quantity_textbox(self, chart):
         print("Quantity textbox changed")
@@ -234,6 +235,40 @@ class PolygonQChart(QtChart):
         elif current_est.time() >= dt.datetime.strptime("16:00", "%H:%M").time():
             return current_est.date()
         return current_est.date()
+    
+    def identify_financial_instrument(self, input_string):
+        # Check for Index
+        if input_string.startswith('^'):
+            return 'Index'
+        
+        # Check for Crypto
+        if '-' in input_string:
+            parts = input_string.split('-')
+            if len(parts) == 2:
+                return 'Crypto'
+        
+        # Check for Option using regex
+        if re.match(r'[A-Z]+(\d{6}[CP]\d+)$', input_string):
+            return 'Option'
+        
+        # Check for Forex
+
+        currency_codes = CurrencyCodes()
+
+        def is_valid_currency(currency):
+            try:
+                return currency_codes.get_currency_name(currency) is not None
+            except:
+                return False
+        try:
+            # Attempt to parse and get the rate to validate if it's a real currency pair
+            if len(input_string) == 6 and is_valid_currency(input_string[:3]) and is_valid_currency(input_string[3:]):
+                return 'Forex'
+        except:
+            pass
+        
+        # Default to Stock
+        return 'Stock'
         
 
 async def main():

@@ -1,3 +1,24 @@
+# Change
+To run the application, execute the `combined_test.py` script:
+
+```bash
+python combined_test.py
+```
+
+(You can toggle between live and historical data by setting the live parameter)
+
+## Symbol Formatting
+- **Stock**: Just use the ticker symbol.
+  - Example: `AAPL`
+- **Option**: Use the full option chain identifier.
+  - Example: `SPY251219C00650000`
+- **Index**: Start with a caret (`^`).
+  - Example: `^SPX`
+- **Forex**: Use the currency pair code.
+  - Example: `EURUSD`
+- **Crypto**: Include a hyphen between the base and quote currencies.
+  - Example: `BTC-USD`
+
 <div align="center">
 
 # lightweight-charts-python
