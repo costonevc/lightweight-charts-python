@@ -11,6 +11,8 @@ import pandas as pd
 import qasync
 import sys
 import re
+import pytz
+from lightweight_charts.chart import WebviewHandler
 
 if QWebEngineView:
     class Bridge(QObject):
@@ -82,6 +84,7 @@ class QtChart(abstract.AbstractChart):
     def get_webview(self): return self.webview
 
 class PolygonQChart(QtChart):
+    # WV: WebviewHandler = WebviewHandler()
     def __init__(self, api_key: str, widget: QWidget = None, live: bool = False, num_bars: int = 200,
                  end_date: str = 'now', limit: int = 5000,
                  timeframe_options: tuple = ('1min', '5min', '30min', 'D', 'W'),
@@ -121,7 +124,7 @@ class PolygonQChart(QtChart):
         # {self.id}.search.window.style.display = "flex"
         # {self.id}.search.box.focus()
         # ''')
-        
+        # abstract.Window._return_q = PolygonQChart.WV.return_queue
         print("PolygonQChart initialization complete")
 
     def show(self):
@@ -148,7 +151,6 @@ class PolygonQChart(QtChart):
         self.bridge = Bridge(self, mainwindow)
         self.web_channel.registerObject('bridge', self.bridge)
 
-    # same method
     async def _polygon(self, symbol):
         print(f"Fetching data for {symbol}")
         self.spinner(True)
@@ -158,13 +160,14 @@ class PolygonQChart(QtChart):
         delta = dt.timedelta(**{span + 's': int(mult)})
         short_delta = (delta < dt.timedelta(days=7))
         start_date = dt.datetime.now() if self.end_date == 'now' else dt.datetime.strptime(self.end_date, '%Y-%m-%d')
+        start_date = self.get_adjusted_date() if self.end_date == 'now' else start_date
         remaining_bars = self.num_bars
         while remaining_bars > 0:
             start_date -= delta
             if start_date.weekday() > 4 and short_delta:  # Monday to Friday (0 to 4)
                 continue
             remaining_bars -= 1
-        epoch = dt.datetime.fromtimestamp(0)
+        epoch = dt.datetime.fromtimestamp(0).date() if self.end_date == 'now' else dt.datetime.fromtimestamp(0)
         start_date = epoch if start_date < epoch else start_date
         success = await getattr(self.polygon, 'async_'+self.topbar['security'].value.lower())(
             symbol,
@@ -179,19 +182,16 @@ class PolygonQChart(QtChart):
         print(f"Data fetched for {symbol}: {'Success' if success else 'Failed'}")
         return success
     
-    # same method
     async def on_search(self, chart, searched_string):
         print(f"Search triggered for {searched_string}")
         chart.toolbox.save_drawings_under(chart.topbar['symbol'])
         chart.topbar['symbol'].set(searched_string if await self._polygon(searched_string) else '')
         chart.toolbox.load_drawings(chart.topbar['symbol'].value)
 
-    # same method
     async def _on_timeframe_selection(self, chart):
         print("Timeframe selection changed")
         await self._polygon(chart.topbar['symbol'].value) if chart.topbar['symbol'].value else None
 
-    # same method
     async def _on_security_selection(self, chart):
         print("Security selection changed")
         self.precision(5 if chart.topbar['security'].value == 'Forex' else 2)
@@ -201,6 +201,7 @@ class PolygonQChart(QtChart):
         quantity = chart.topbar['quantity'].value
         if quantity:
             print(f"Quantity: {quantity}")
+
 
     def _convert_timeframe(self, timeframe):
         spans = {
@@ -216,6 +217,24 @@ class PolygonQChart(QtChart):
             return 1, spans[timeframe]
         timespan = spans[timeframe.replace(multiplier, '')]
         return multiplier, timespan
+    
+    def convert_to_est(self, utc_datetime):
+        utc_zone = pytz.timezone('UTC')
+        est_zone = pytz.timezone('America/New_York')
+        utc_datetime = utc_zone.localize(utc_datetime)
+        est_datetime = utc_datetime.astimezone(est_zone)
+        return est_datetime
+    
+    def get_adjusted_date(self):
+        current_utc = dt.datetime.utcnow()
+        current_est = self.convert_to_est(current_utc)
+
+        if current_est.time() < dt.datetime.strptime("09:00", "%H:%M").time():
+            return current_est.date() - dt.timedelta(days=1)
+        elif current_est.time() >= dt.datetime.strptime("16:00", "%H:%M").time():
+            return current_est.date()
+        return current_est.date()
+        
 
 async def main():
     app = QApplication.instance() or QApplication(sys.argv)
