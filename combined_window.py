@@ -2,7 +2,6 @@ from PyQt5.QtWidgets import QWidget, QApplication
 from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage
 from PyQt5.QtWebChannel import QWebChannel
 from PyQt5.QtCore import QObject, pyqtSlot as Slot, QUrl, QTimer
-# from lightweight_charts.widgets import QtChart
 from lightweight_charts import abstract
 from lightweight_charts.util import parse_event_message
 import asyncio
@@ -84,7 +83,6 @@ class QtChart(abstract.AbstractChart):
     def get_webview(self): return self.webview
 
 class PolygonQChart(QtChart):
-    # WV: WebviewHandler = WebviewHandler()
     def __init__(self, api_key: str, widget: QWidget = None, live: bool = False, num_bars: int = 200,
                  end_date: str = 'now', limit: int = 5000,
                  timeframe_options: tuple = ('1min', '5min', '30min', 'D', 'W'),
@@ -125,7 +123,6 @@ class PolygonQChart(QtChart):
         # {self.id}.search.window.style.display = "flex"
         # {self.id}.search.box.focus()
         # ''')
-        # abstract.Window._return_q = PolygonQChart.WV.return_queue
         print("PolygonQChart initialization complete")
 
     def show(self):
@@ -277,7 +274,7 @@ async def main():
     asyncio.set_event_loop(qloop)
 
     chart = PolygonQChart(
-        api_key="q0TtwNDqD1yz2pnD96HDLOBTMSKVh2Zl",
+        api_key="q0TtwNDqD1yz2pnD96HDLOBTMSKVh2Zl", # Change API key here
         width=1000,
         height=800,
         live=False
