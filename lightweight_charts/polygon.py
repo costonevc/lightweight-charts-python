@@ -6,6 +6,7 @@ import json
 import urllib.request
 from typing import Literal, Union, List
 import pandas as pd
+import pytz
 
 from .chart import Chart
 
@@ -45,6 +46,7 @@ def _convert_timeframe(timeframe):
         'D': 'day',
         'W': 'week',
         'M': 'month',
+        'sec': 'second',
     }
     try:
         multiplier = re.findall(r'\d+', timeframe)[0]
@@ -93,7 +95,11 @@ def get_bar_data(ticker: str, timeframe: str, start_date: str, end_date: str, li
         return None
 
     df = pd.DataFrame(results)
+    # utc_zone = pytz.timezone('UTC')
+    # est_zone = pytz.timezone('America/New_York')
     df['t'] = pd.to_datetime(df['t'], unit='ms')
+    # df['t'] = pd.to_datetime(df['t'], unit='ms').dt.tz_localize('UTC').dt.tz_convert('America/New_York')
+    # print('converted_bar', df['t'])
 
     rename = {'o': 'open', 'h': 'high', 'l': 'low', 'c': 'close', 't': 'time'}
     if not ticker.startswith('I:'):
@@ -195,6 +201,9 @@ async def _handle_tick(ticker, data):
     lasts = _lasts[ticker]
     sec_type = _get_sec_type(ticker)
 
+    # utc_zone = pytz.timezone('UTC')
+    # est_zone = pytz.timezone('America/New_York')
+
     if data['ev'] in ('Q', 'V', 'C', 'XQ'):
         if sec_type == 'forex':
             data['bp'] = data.pop('b')
@@ -211,6 +220,11 @@ async def _handle_tick(ticker, data):
             lasts['time'] = pd.to_datetime(data.pop('s'), unit='ms')
         else:
             lasts['time'] = pd.to_datetime(data['t'], unit='ms')
+
+    # utc_datetime = utc_zone.localize(lasts['time'].to_pydatetime())
+    #     est_datetime = utc_datetime.astimezone(est_zone)
+    #     lasts['time'] = pd.Timestamp(est_datetime)
+    #     # print('converted', lasts['time'])
 
     elif data['ev'] in ('A', 'CA', 'XA'):
         lasts['volume'] = data['v']

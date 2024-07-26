@@ -208,6 +208,7 @@ class PolygonQChart(QtChart):
             'D': 'day',
             'W': 'week',
             'M': 'month',
+            'sec': 'second'
         }
         try:
             multiplier = re.findall(r'\d+', timeframe)[0]

@@ -5,6 +5,7 @@ from base64 import b64decode
 from datetime import datetime
 from typing import Callable, Union, Literal, List, Optional
 import pandas as pd
+import pytz
 
 from .table import Table
 from .toolbox import ToolBox
@@ -201,8 +202,28 @@ class SeriesCommon(Pane):
         if not pd.api.types.is_datetime64_any_dtype(df['time']):
             df['time'] = pd.to_datetime(df['time'])
         df['time'] = df['time'].astype('int64') // 10 ** 9
+        # df['time'] = df['time'] - (4 * 3600) 
         return df
 
+    # def _df_datetime_format(self, df: pd.DataFrame, exclude_lowercase=None):
+    #     df = df.copy()
+    #     df.columns = self._format_labels(df, df.columns, df.index, exclude_lowercase)
+    #     self._set_interval(df)
+
+    #     if not pd.api.types.is_datetime64_any_dtype(df['time']):
+    #         df['time'] = pd.to_datetime(df['time'], unit='ms')
+
+    #     utc_zone = pytz.timezone('UTC')
+    #     eastern = pytz.timezone('America/New_York')
+        
+    #     if df['time'].dt.tz is None:
+    #         df['time'] = df['time'].dt.tz_localize('UTC').dt.tz_convert('America/New_York')
+    #     else:
+    #         df['time'] = df['time'].dt.tz_convert('America/New_York')
+
+    #     df['time'] = (df['time'] - pd.Timestamp("1970-01-01", tz='America/New_York')) // pd.Timedelta(seconds=1)
+    #     return df
+    
     def _series_datetime_format(self, series: pd.Series, exclude_lowercase=None):
         series = series.copy()
         series.index = self._format_labels(series, series.index, series.name, exclude_lowercase)
