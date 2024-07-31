@@ -1,9 +1,12 @@
-from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QPlainTextEdit
+from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QPlainTextEdit, QInputDialog, QLineEdit, QHBoxLayout, QTableWidget, QTableWidgetItem
 from PyQt5.QtCore import QTimer
 import sys
 import asyncio
 import qasync
 from combined_window import PolygonQChart
+# from click_handler_thread import ClickHandlerThread
+from functools import partial
+from ib_insync import *
 
 class MainWindow(QMainWindow):
     def __init__(self, api_key):
@@ -13,24 +16,64 @@ class MainWindow(QMainWindow):
         
         widget = QWidget(self)
         self.setCentralWidget(widget)
-        layout = QVBoxLayout(widget)
+        main_layout = QVBoxLayout(widget)
 
-        self.chart = PolygonQChart(api_key=api_key, widget=widget, width=800, height=550, live=True)
-        layout.addWidget(self.chart.get_webview(), 3)
+        top_layout = QHBoxLayout()
+        self.chart = PolygonQChart(api_key=api_key, widget=widget, width=600, height=550, live=True)
+        top_layout.addWidget(self.chart.get_webview(), 3)
+
+        self.positions_table = QTableWidget()
+        self.setup_positions_table()
+        top_layout.addWidget(self.positions_table, 1)
+
+        main_layout.addLayout(top_layout, 3)
 
         self.log_widget = QPlainTextEdit()
         self.log_widget.setReadOnly(True)
-        layout.addWidget(self.log_widget, 1)
+        main_layout.addWidget(self.log_widget, 1)
 
         self.chart.init_bridge(self)
 
         QTimer.singleShot(100, self.show_chart)
+        QTimer.singleShot(100, self.init_ib_connection)
+
+        # self.chart.display_position()
+
+    def setup_positions_table(self):
+        self.positions_table.setColumnCount(2)  # Two columns: Symbol and Quantity
+        self.positions_table.setHorizontalHeaderLabels(['Symbol', 'Quantity'])
+        self.positions_table.setEditTriggers(QTableWidget.NoEditTriggers)  # Make table read-only
+        self.positions_table.setSelectionBehavior(QTableWidget.SelectRows)  # Enable row selection
+        self.positions_table.clicked.connect(self.on_table_click)  # Connect click event
+
+    def on_table_click(self, index):
+        row = index.row()
+        symbol = self.positions_table.item(row, 0).text()
+        self.chart.on_search(symbol)
+
+    def init_ib_connection(self):
+        loop = asyncio.get_event_loop()
+        loop.create_task(self.chart.connect_ib())
 
     def show_chart(self):
         self.chart.show()
+        self.update_positions() 
+
 
     def log_message(self, message):
         self.log_widget.appendPlainText(message)
+    
+    def update_positions(self):
+        # This function needs to fetch data and update the table
+        self.positions_table.setRowCount(0)  # Clear existing data
+        positions = self.chart.ib.positions()  # Get all positions from IB
+        print("Positions: ", positions)
+        for pos in positions:
+            row_position = self.positions_table.rowCount()
+            self.positions_table.insertRow(row_position)
+            self.positions_table.setItem(row_position, 0, QTableWidgetItem(pos.contract.symbol))
+            self.positions_table.setItem(row_position, 1, QTableWidgetItem(str(pos.position)))
+        QTimer.singleShot(5000, self.update_positions)  # Schedule next update
 
 
 async def main(api_key):

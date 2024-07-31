@@ -1,7 +1,8 @@
-from PyQt5.QtWidgets import QWidget, QApplication
+from PyQt5.QtWidgets import QWidget, QApplication, QTableWidgetItem, QTableWidget
 from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage
 from PyQt5.QtWebChannel import QWebChannel
 from PyQt5.QtCore import QObject, pyqtSlot as Slot, QUrl, QTimer
+# from lightweight_charts.widgets import QtChart
 from lightweight_charts import abstract
 from lightweight_charts.util import parse_event_message
 import asyncio
@@ -12,6 +13,7 @@ import sys
 import re
 import pytz
 from forex_python.converter import CurrencyCodes
+from ib_insync import *
 
 if QWebEngineView:
     class Bridge(QObject):
@@ -98,6 +100,11 @@ class PolygonQChart(QtChart):
         self.limit = limit
         self.live = live
 
+        self.ib = IB()
+        # self.ib.connect('127.0.0.1', 7497, clientId=10, account='DU8014278')
+        # asyncio.ensure_future(self.ib.connect('127.0.0.1', 7497, clientId=10, account='DU8014278'), loop=asyncio.get_event_loop())
+        # asyncio.create_task(self.ib.connect('127.0.0.1', 7497, clientId=10, account='DU8014278'))
+
         # Set up the QWebEngineView
         self.webview.setFixedSize(width, height)
         
@@ -117,13 +124,22 @@ class PolygonQChart(QtChart):
         self.topbar.textbox('security')
 
         self.topbar.textbox('quantity', '1', func=self._on_quantity_textbox)
-        
+
         # Run initial script
         # self.run_script(f'''
         # {self.id}.search.window.style.display = "flex"
         # {self.id}.search.box.focus()
         # ''')
+        # abstract.Window._return_q = PolygonQChart.WV.return_queue
         print("PolygonQChart initialization complete")
+
+    async def connect_ib(self):
+        util.patchAsyncio()
+        try:
+            await self.ib.connectAsync('127.0.0.1', 7497, clientId=10)
+            print("IB Connection established")
+        except Exception as e:
+            print(f"Failed to connect IB: {str(e)}")
 
     def show(self):
         print("Show method called")
@@ -267,6 +283,35 @@ class PolygonQChart(QtChart):
         
         # Default to Stock
         return 'Stock'
+
+    
+    # def on_row_click(self, row):
+    #     symbol = row['symbol']
+    #     self.on_search(self, symbol)
+
+    # def display_position(self):
+    #     if not hasattr(self, 'position_table'):
+    #         self.position_table = self.create_table(
+    #             width=0.4,
+    #             height=0.5,
+    #             headings=('symbol', 'value'),
+    #             widths=(0.7, 0.3),
+    #             alignments=('left', 'center'),
+    #             position='left',
+    #             func=self.on_row_click
+    #         )
+    #     positions = self.ib.positions()  # Get all positions
+    #     print(positions)
+    #     self.position_table.clear()  # Clear existing data
+    #     for pos in positions:
+    #         symbol = pos.contract.symbol
+    #         position_qty = pos.position
+    #         self.position_table.new_row([symbol, position_qty])
+    #     print("Position table updated.")
+
+    #     # Update the table at a regular interval
+    #     QTimer.singleShot(5000, self.display_position)  # Updates every 5 seconds
+
         
 
 async def main():
@@ -275,7 +320,7 @@ async def main():
     asyncio.set_event_loop(qloop)
 
     chart = PolygonQChart(
-        api_key="q0TtwNDqD1yz2pnD96HDLOBTMSKVh2Zl", # Change API key here
+        api_key="q0TtwNDqD1yz2pnD96HDLOBTMSKVh2Zl",
         width=1000,
         height=800,
         live=False
