@@ -199,30 +199,25 @@ class SeriesCommon(Pane):
         df = df.copy()
         df.columns = self._format_labels(df, df.columns, df.index, exclude_lowercase)
         self._set_interval(df)
+
         if not pd.api.types.is_datetime64_any_dtype(df['time']):
-            df['time'] = pd.to_datetime(df['time'])
-        df['time'] = df['time'].astype('int64') // 10 ** 9
-        # df['time'] = df['time'] - (4 * 3600) 
+            df['time'] = pd.to_datetime(df['time'], unit='ms')
+        if df['time'].dt.tz is None:
+            df['time'] = df['time'].dt.tz_localize('UTC').dt.tz_convert('America/New_York')
+        else:
+            df['time'] = df['time'].dt.tz_convert('America/New_York')
+
+        def adjust_time(row):
+            ts = row['time']
+            offset_seconds = ts.tzinfo.utcoffset(ts).total_seconds()
+            new_ts = (ts - pd.Timestamp("1970-01-01", tz='America/New_York')) // pd.Timedelta(seconds=1)
+            if offset_seconds == -14400:
+                new_ts += 3600
+            return new_ts
+
+        df['time'] = df.apply(adjust_time, axis=1)
+
         return df
-
-    # def _df_datetime_format(self, df: pd.DataFrame, exclude_lowercase=None):
-    #     df = df.copy()
-    #     df.columns = self._format_labels(df, df.columns, df.index, exclude_lowercase)
-    #     self._set_interval(df)
-
-    #     if not pd.api.types.is_datetime64_any_dtype(df['time']):
-    #         df['time'] = pd.to_datetime(df['time'], unit='ms')
-
-    #     utc_zone = pytz.timezone('UTC')
-    #     eastern = pytz.timezone('America/New_York')
-        
-    #     if df['time'].dt.tz is None:
-    #         df['time'] = df['time'].dt.tz_localize('UTC').dt.tz_convert('America/New_York')
-    #     else:
-    #         df['time'] = df['time'].dt.tz_convert('America/New_York')
-
-    #     df['time'] = (df['time'] - pd.Timestamp("1970-01-01", tz='America/New_York')) // pd.Timedelta(seconds=1)
-    #     return df
     
     def _series_datetime_format(self, series: pd.Series, exclude_lowercase=None):
         series = series.copy()
@@ -231,13 +226,27 @@ class SeriesCommon(Pane):
         return series
 
     def _single_datetime_format(self, arg) -> float:
+        eastern = pytz.timezone('America/New_York')
         if isinstance(arg, (str, int, float)) or not pd.api.types.is_datetime64_any_dtype(arg):
             try:
                 arg = pd.to_datetime(arg, unit='ms')
             except ValueError:
                 arg = pd.to_datetime(arg)
-        arg = self._interval * (arg.timestamp() // self._interval)+self.offset
-        return arg
+        if arg.tz is None:
+            arg = arg.tz_localize('UTC')
+        arg = arg.tz_convert(eastern)
+        offset_seconds = arg.tzinfo.utcoffset(arg).total_seconds()
+        
+        is_edt = offset_seconds == -14400  # -4 hours
+
+        seconds_since_epoch = (arg - pd.Timestamp("1970-01-01", tz='America/New_York')).total_seconds()
+        
+        if is_edt:
+            seconds_since_epoch += 3600 
+
+        adjusted_timestamp = self._interval * (int(seconds_since_epoch) // self._interval) + self.offset
+
+        return adjusted_timestamp
 
     def set(self, df: Optional[pd.DataFrame] = None, format_cols: bool = True):
         if df is None or df.empty:

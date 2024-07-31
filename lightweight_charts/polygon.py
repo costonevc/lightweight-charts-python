@@ -221,11 +221,6 @@ async def _handle_tick(ticker, data):
         else:
             lasts['time'] = pd.to_datetime(data['t'], unit='ms')
 
-    # utc_datetime = utc_zone.localize(lasts['time'].to_pydatetime())
-    #     est_datetime = utc_datetime.astimezone(est_zone)
-    #     lasts['time'] = pd.Timestamp(est_datetime)
-    #     # print('converted', lasts['time'])
-
     elif data['ev'] in ('A', 'CA', 'XA'):
         lasts['volume'] = data['v']
         if not lasts.get('time'):

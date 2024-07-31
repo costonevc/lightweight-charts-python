@@ -837,63 +837,202 @@
 #     chart.show(block=True)
 
 """ save drawings  """
+# import pandas as pd
+# from lightweight_charts import Chart
+
+
+# def get_bar_data(symbol, timeframe):
+#     if symbol not in ('AAPL', 'GOOGL', 'TSLA'):
+#         print(f'No data for "{symbol}"')
+#         return pd.DataFrame()
+#     return pd.read_csv(f'examples/6_callbacks/bar_data/{symbol}_{timeframe}.csv')
+
+
+# def on_search(chart, searched_string):
+#     new_data = get_bar_data(searched_string, chart.topbar['timeframe'].value)
+#     if new_data.empty:
+#         return
+#     chart.topbar['symbol'].set(searched_string)
+#     chart.set(new_data)
+    
+#     # Load the drawings saved under the symbol.
+#     chart.toolbox.load_drawings(searched_string)
+
+
+# def on_timeframe_selection(chart):
+#     new_data = get_bar_data(chart.topbar['symbol'].value, chart.topbar['timeframe'].value)
+#     if new_data.empty:
+#         return
+#     # The symbol has not changed, so we want to re-render the drawings.
+#     chart.set(new_data, keep_drawings=True)
+
+
+# if __name__ == '__main__':
+#     chart = Chart(toolbox=True)
+#     chart.legend(True)
+
+#     chart.events.search += on_search
+#     chart.topbar.textbox('symbol', 'TSLA')
+#     chart.topbar.switcher(
+#         'timeframe',
+#         ('1min', '5min', '30min'),
+#         default='5min',
+#         func=on_timeframe_selection
+#     )
+
+#     df = get_bar_data('TSLA', '5min')
+
+#     chart.set(df)
+
+#     # Imports the drawings saved in the JSON file.
+#     chart.toolbox.import_drawings('test/drawings.json')
+    
+#     # Loads the drawings under the default symbol.
+#     chart.toolbox.load_drawings(chart.topbar['symbol'].value)  
+    
+#     # Saves drawings based on the symbol.
+#     chart.toolbox.save_drawings_under(chart.topbar['symbol'])  
+
+#     chart.show(block=True)
+    
+#     # Exports the drawings to the JSON file upon close.
+#     chart.toolbox.export_drawings('test/drawings.json')  
+
+
+# import pandas as pd
+# import pytz
+
+# def calculate_unix_timestamp(time_str):
+#     # 定义时区
+#     utc_zone = pytz.timezone('UTC')
+#     eastern = pytz.timezone('America/New_York')
+    
+#     # 解析时间字符串为 UTC datetime
+#     utc_datetime = pd.to_datetime(time_str).tz_localize(utc_zone)
+    
+#     # 转换时区到 New York
+#     eastern_datetime = utc_datetime.tz_convert(eastern)
+    
+#     # 计算 Unix 时间戳 (自 1970-01-01 00:00:00 UTC)
+#     unix_timestamp = (eastern_datetime - pd.Timestamp("1970-01-01", tz=utc_zone)).total_seconds()
+    
+#     return unix_timestamp
+
+# # 示例使用
+# time_str = "2024-07-29 15:26:51.703000+00:00"
+# timestamp = calculate_unix_timestamp(time_str)
+# print("Unix Timestamp:", timestamp)
+
+# import pendulum
+
+# dt = pendulum.parse('2012-09-05T23:26:11.123789')
+# print(type(dt))
+
 import pandas as pd
-from lightweight_charts import Chart
+# def _df_datetime_format(self, df: pd.DataFrame, exclude_lowercase=None):
+#         df = df.copy()
+#         df.columns = self._format_labels(df, df.columns, df.index, exclude_lowercase)
+#         self._set_interval(df)
 
+#         if not pd.api.types.is_datetime64_any_dtype(df['time']):
+#             df['time'] = pd.to_datetime(df['time'], unit='ms')
+#         if df['time'].dt.tz is None:
+#             df['time'] = df['time'].dt.tz_localize('UTC').dt.tz_convert('America/New_York')
+#         else:
+#             df['time'] = df['time'].dt.tz_convert('America/New_York')
+#         df['time'] = (df['time'] - pd.Timestamp("1970-01-01", tz='America/New_York')) // pd.Timedelta(seconds=1) #少了一个小时
+#         # df['time'] = df['time'].apply(lambda x: int(x.timestamp()))
+#         # 使用 Pendulum 转换时间到 New York 时区
+#         # df['time'] = df['time'].apply(lambda x: pendulum.instance(x.to_pydatetime(), tz='UTC').in_tz('America/New_York')) #这步是对的
+#         # print(df['time'])
 
-def get_bar_data(symbol, timeframe):
-    if symbol not in ('AAPL', 'GOOGL', 'TSLA'):
-        print(f'No data for "{symbol}"')
-        return pd.DataFrame()
-    return pd.read_csv(f'examples/6_callbacks/bar_data/{symbol}_{timeframe}.csv')
+#         # # 计算 UNIX 时间戳，以东部时间为基准
+#         # df['time'] = df['time'].apply(lambda x: x.int_timestamp) #这样还是utc
+#         # print('before', df['time'])
+#         # df['time'] = df['time'].apply(lambda x: x.isoformat())
+#         # df['time'] = df['time'].apply(lambda x: x.strftime('%Y-%m-%dT%H:%M:%S'))
+#         # print(df['time'])
+#         return df
+import datetime
+import pytz
+# eastern = pytz.timezone('America/New_York')
+# dt_naive = datetime.datetime(2024, 7, 30, 4, 0, 0)  # 创建一个不带时区信息的 datetime 对象
+# dt_aware = eastern.localize(dt_naive)  # 将时区信息添加到 datetime 对象
 
+# print(dt_aware)
 
-def on_search(chart, searched_string):
-    new_data = get_bar_data(searched_string, chart.topbar['timeframe'].value)
-    if new_data.empty:
-        return
-    chart.topbar['symbol'].set(searched_string)
-    chart.set(new_data)
+# dt_aware = (dt_aware - pd.Timestamp("1970-01-01", tz='America/New_York')) // pd.Timedelta(seconds=1)
+# print(dt_aware)
+
+eastern = pytz.timezone('America/New_York')
+dt_naive = datetime.datetime(2023, 6, 1, 4, 0, 0)  # 创建一个不带时区信息的 datetime 对象
+dt_aware = eastern.localize(dt_naive)  # 将时区信息添加到 datetime 对象
+
+print(dt_aware)
+
+timestamp = (dt_aware - pd.Timestamp("1970-01-01", tz='America/New_York')) // pd.Timedelta(seconds=1)
+print(timestamp)
+
+if dt_aware.tzinfo.utcoffset(dt_aware).total_seconds() == -14400:  # EDT offset in seconds
+    timestamp += 3600  # Add one hour in seconds
+
+print("Adjusted UNIX timestamp:", timestamp)
+
+def convert_timestamp_to_est(unix_timestamp):
+    # Define the timezone for Eastern Time
+    eastern = pytz.timezone('America/New_York')
     
-    # Load the drawings saved under the symbol.
-    chart.toolbox.load_drawings(searched_string)
-
-
-def on_timeframe_selection(chart):
-    new_data = get_bar_data(chart.topbar['symbol'].value, chart.topbar['timeframe'].value)
-    if new_data.empty:
-        return
-    # The symbol has not changed, so we want to re-render the drawings.
-    chart.set(new_data, keep_drawings=True)
-
-
-if __name__ == '__main__':
-    chart = Chart(toolbox=True)
-    chart.legend(True)
-
-    chart.events.search += on_search
-    chart.topbar.textbox('symbol', 'TSLA')
-    chart.topbar.switcher(
-        'timeframe',
-        ('1min', '5min', '30min'),
-        default='5min',
-        func=on_timeframe_selection
-    )
-
-    df = get_bar_data('TSLA', '5min')
-
-    chart.set(df)
-
-    # Imports the drawings saved in the JSON file.
-    chart.toolbox.import_drawings('test/drawings.json')
+    # Convert the UNIX timestamp to a datetime object in UTC
+    utc_time = datetime.datetime.utcfromtimestamp(unix_timestamp)
     
-    # Loads the drawings under the default symbol.
-    chart.toolbox.load_drawings(chart.topbar['symbol'].value)  
+    # Localize the UTC datetime object to UTC timezone (to make it timezone-aware)
+    utc_time = pytz.utc.localize(utc_time)
     
-    # Saves drawings based on the symbol.
-    chart.toolbox.save_drawings_under(chart.topbar['symbol'])  
+    # Convert the timezone from UTC to Eastern Time
+    eastern_time = utc_time.astimezone(eastern)
+    
+    return eastern_time
 
-    chart.show(block=True)
-    
-    # Exports the drawings to the JSON file upon close.
-    chart.toolbox.export_drawings('test/drawings.json')  
+# Example usage
+
+eastern_time = convert_timestamp_to_est(timestamp)
+print(eastern_time)
+
+data = {
+    'time': [datetime.datetime(2023, 6, 1, 4, 0, 0),datetime.datetime(2023, 12, 1, 4, 0, 0)]
+}
+df = pd.DataFrame(data)
+print(df['time'])
+df['time'] = df['time'].dt.tz_localize('UTC').dt.tz_convert('America/New_York')
+
+def adjust_time(row):
+    # 获取时间戳
+    ts = row['time']
+    # 获取时区偏移
+    offset_seconds = ts.tzinfo.utcoffset(ts).total_seconds()
+    # 计算新的时间戳
+    new_ts = (ts - pd.Timestamp("1970-01-01", tz='America/New_York')) // pd.Timedelta(seconds=1)
+    # 如果是EDT (东部夏令时，偏移为-14400秒)
+    if offset_seconds == -14400:
+        new_ts += 3600
+    return new_ts
+
+# 应用调整
+df['time'] = df.apply(adjust_time, axis=1)
+
+# 打印结果
+print(df)
+# df['offset'] = df['time'].apply(lambda x: x.tzinfo.utcoffset(x).total_seconds())
+# print(df)
+
+# # 检查每个时间戳的时区偏移是否为EDT或EST
+# df['timezone'] = df['offset'].apply(lambda x: 'EDT' if x == -14400 else 'EST')
+# print(df)
+
+# print(df['time'].dt.tz)
+# offset_seconds = df['time'].dt.tz[0].utcoffset().total_seconds()
+# print("Offset in seconds:", offset_seconds)
+# if df['time'].dt.tz.utcoffset(df['time']).total_seconds() == -14400:  # EDT offset in seconds
+#     df['time'] = (df['time'] - pd.Timestamp("1970-01-01", tz='America/New_York')) // pd.Timedelta(seconds=1) + 3600
+# else:
+#     df['time'] = (df['time'] - pd.Timestamp("1970-01-01", tz='America/New_York')) // pd.Timedelta(seconds=1)
