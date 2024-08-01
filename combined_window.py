@@ -89,6 +89,7 @@ class PolygonQChart(QtChart):
                  end_date: str = 'now', limit: int = 5000,
                  timeframe_options: tuple = ('1min', '5min', '30min', 'D', 'W'),
                 #  security_options: tuple = ('Stock', 'Option', 'Index', 'Forex', 'Crypto'),
+                order_options: tuple = ('Buy', 'Sell'),
                  toolbox: bool = True, width: int = 800, height: int = 600,
                  inner_width: float = 1.0, inner_height: float = 1.0, scale_candles_only: bool = False):
         super().__init__(widget, inner_width, inner_height, scale_candles_only, toolbox)
@@ -101,9 +102,7 @@ class PolygonQChart(QtChart):
         self.live = live
 
         self.ib = IB()
-        # self.ib.connect('127.0.0.1', 7497, clientId=10, account='DU8014278')
-        # asyncio.ensure_future(self.ib.connect('127.0.0.1', 7497, clientId=10, account='DU8014278'), loop=asyncio.get_event_loop())
-        # asyncio.create_task(self.ib.connect('127.0.0.1', 7497, clientId=10, account='DU8014278'))
+        self.account = 'DU8014278'
 
         # Set up the QWebEngineView
         self.webview.setFixedSize(width, height)
@@ -124,6 +123,9 @@ class PolygonQChart(QtChart):
         self.topbar.textbox('security')
 
         self.topbar.textbox('quantity', '1', func=self._on_quantity_textbox)
+
+        self.topbar.switcher('order', order_options)
+        self.topbar.button('market', 'Place Market Order', func=self._on_market_order)
 
         # Run initial script
         # self.run_script(f'''
@@ -215,6 +217,21 @@ class PolygonQChart(QtChart):
         quantity = chart.topbar['quantity'].value
         if quantity:
             print(f"Quantity: {quantity}")
+
+    async def _on_market_order(self, chart):
+        print("Market order button clicked")
+        quantity = chart.topbar['quantity'].value
+        operation = chart.topbar['order'].value
+        if not chart.topbar['symbol'].value:
+            print("No symbol selected")
+            return
+        if not quantity:
+            print("No quantity entered")
+            return
+        if chart.topbar['security'].value == 'Stock':
+            contract = Stock(chart.topbar['symbol'].value, 'SMART', 'USD')
+            market_order = MarketOrder(operation, quantity, account = self.account)
+            market_trade = self.ib.placeOrder(contract, market_order)
 
 
     def _convert_timeframe(self, timeframe):

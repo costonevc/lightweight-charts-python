@@ -4,7 +4,6 @@ import sys
 import asyncio
 import qasync
 from combined_window import PolygonQChart
-# from click_handler_thread import ClickHandlerThread
 from functools import partial
 from ib_insync import *
 
@@ -37,7 +36,6 @@ class MainWindow(QMainWindow):
         QTimer.singleShot(100, self.show_chart)
         QTimer.singleShot(100, self.init_ib_connection)
 
-        # self.chart.display_position()
 
     def setup_positions_table(self):
         self.positions_table.setColumnCount(2)  # Two columns: Symbol and Quantity
