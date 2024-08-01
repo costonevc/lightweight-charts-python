@@ -9,6 +9,7 @@ import asyncio
 import datetime as dt
 import pandas as pd
 import qasync
+from qasync import asyncSlot
 import sys
 import re
 import pytz
@@ -38,6 +39,47 @@ if QWebEngineView:
         @Slot(result=str)
         def getCurrentQuantity(self):
             return self.chart.get_current_quantity()
+        
+        @asyncSlot(float)
+        async def handleHorizontalLineOrder(self, line_price):
+            ticker = self.chart.topbar['symbol'].value
+            operation = self.chart.topbar['order'].value
+            quantity = self.chart.topbar['quantity'].value
+            current_price = self.chart._last_bar['close']
+            security = self.chart.topbar['security'].value
+            
+            if not quantity:
+                print("No quantity entered")
+                return
+            if operation == 'Buy':
+                if line_price < current_price:
+                    order_type = 'Limit'
+                else:
+                    order_type = 'Stop'
+            elif operation == 'Sell':
+                if line_price > current_price:
+                    order_type = 'Limit'
+                else:
+                    order_type = 'Stop'
+            if security == 'Stock':
+                contract = Stock(ticker, 'SMART', 'USD')
+                if order_type == 'Limit':
+                    print("Placing limit order")
+                    limit_price = line_price
+                    limit_order = LimitOrder(operation, quantity, limit_price, account=self.chart.account)
+                    limit_trade = self.chart.ib.placeOrder(contract, limit_order)
+                    await asyncio.sleep(1)
+                    print("Order status:", limit_trade.orderStatus.status)
+                    print("Order log:", limit_trade.log)
+                elif order_type == 'Stop':
+                    print("Placing stop order")
+                    stop_price = line_price
+                    stop_order = StopOrder(operation, quantity, stop_price, account=self.chart.account)
+                    stop_trade = self.chart.ib.placeOrder(contract, stop_order)
+                    await asyncio.sleep(1)
+                    print("Order status:", stop_trade.orderStatus.status)
+                    print("Order log:", stop_trade.log)
+                    
 
 def emit_callback(window, string):
     func, args = parse_event_message(window, string)
@@ -134,7 +176,7 @@ class PolygonQChart(QtChart):
         # ''')
         # abstract.Window._return_q = PolygonQChart.WV.return_queue
         print("PolygonQChart initialization complete")
-
+    
     async def connect_ib(self):
         util.patchAsyncio()
         try:

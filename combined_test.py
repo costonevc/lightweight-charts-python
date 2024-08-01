@@ -65,7 +65,6 @@ class MainWindow(QMainWindow):
         self.log_widget.appendPlainText(message)
     
     def update_positions(self):
-        # This function needs to fetch data and update the table
         self.positions_table.setRowCount(0)  # Clear existing data
         positions = self.chart.ib.positions(account='DU8014278')  # Get all positions from IB
         for pos in positions:

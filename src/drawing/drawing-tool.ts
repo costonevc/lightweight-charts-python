@@ -102,6 +102,8 @@ export class DrawingTool {
             this._activeDrawing = new this._drawingType(point, point);
             this._series.attachPrimitive(this._activeDrawing);
             if (this._drawingType == HorizontalLine) {
+                window.pythonObject.handleHorizontalLineOrder(point.price);
+                
                 window.pythonObject.log_message(`Added horizontal line at price: ${point.price}`);
                 window.pythonObject.log_message(`Buy ${point.quantity} of ${point.ticker} at ${point.price}`);
                 
