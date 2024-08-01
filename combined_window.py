@@ -283,35 +283,6 @@ class PolygonQChart(QtChart):
         
         # Default to Stock
         return 'Stock'
-
-    
-    # def on_row_click(self, row):
-    #     symbol = row['symbol']
-    #     self.on_search(self, symbol)
-
-    # def display_position(self):
-    #     if not hasattr(self, 'position_table'):
-    #         self.position_table = self.create_table(
-    #             width=0.4,
-    #             height=0.5,
-    #             headings=('symbol', 'value'),
-    #             widths=(0.7, 0.3),
-    #             alignments=('left', 'center'),
-    #             position='left',
-    #             func=self.on_row_click
-    #         )
-    #     positions = self.ib.positions()  # Get all positions
-    #     print(positions)
-    #     self.position_table.clear()  # Clear existing data
-    #     for pos in positions:
-    #         symbol = pos.contract.symbol
-    #         position_qty = pos.position
-    #         self.position_table.new_row([symbol, position_qty])
-    #     print("Position table updated.")
-
-    #     # Update the table at a regular interval
-    #     QTimer.singleShot(5000, self.display_position)  # Updates every 5 seconds
-
         
 
 async def main():

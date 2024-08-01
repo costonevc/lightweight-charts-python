@@ -11,7 +11,7 @@ from ib_insync import *
 class MainWindow(QMainWindow):
     def __init__(self, api_key):
         super().__init__()
-        self.resize(800, 600) 
+        self.resize(1000, 800) 
         self.setWindowTitle("Polygon Chart with Interactive Features")
         
         widget = QWidget(self)
@@ -19,7 +19,7 @@ class MainWindow(QMainWindow):
         main_layout = QVBoxLayout(widget)
 
         top_layout = QHBoxLayout()
-        self.chart = PolygonQChart(api_key=api_key, widget=widget, width=600, height=550, live=True)
+        self.chart = PolygonQChart(api_key=api_key, widget=widget, width=750, height=600, live=True)
         top_layout.addWidget(self.chart.get_webview(), 3)
 
         self.positions_table = QTableWidget()
@@ -47,9 +47,12 @@ class MainWindow(QMainWindow):
         self.positions_table.clicked.connect(self.on_table_click)  # Connect click event
 
     def on_table_click(self, index):
+        asyncio.ensure_future(self.async_on_table_click(index))
+
+    async def async_on_table_click(self, index):
         row = index.row()
         symbol = self.positions_table.item(row, 0).text()
-        self.chart.on_search(symbol)
+        await self.chart.on_search(self.chart, symbol)
 
     def init_ib_connection(self):
         loop = asyncio.get_event_loop()
@@ -66,8 +69,7 @@ class MainWindow(QMainWindow):
     def update_positions(self):
         # This function needs to fetch data and update the table
         self.positions_table.setRowCount(0)  # Clear existing data
-        positions = self.chart.ib.positions()  # Get all positions from IB
-        print("Positions: ", positions)
+        positions = self.chart.ib.positions(account='DU8014278')  # Get all positions from IB
         for pos in positions:
             row_position = self.positions_table.rowCount()
             self.positions_table.insertRow(row_position)
