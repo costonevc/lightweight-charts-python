@@ -169,6 +169,8 @@ class PolygonQChart(QtChart):
         self.topbar.switcher('order', order_options)
         self.topbar.button('market', 'Place Market Order', func=self._on_market_order)
 
+        self.toolbox.import_drawings("drawings.json")
+
         # Run initial script
         # self.run_script(f'''
         # {self.id}.search.window.style.display = "flex"

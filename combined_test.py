@@ -60,7 +60,6 @@ class MainWindow(QMainWindow):
         self.chart.show()
         self.update_positions() 
 
-
     def log_message(self, message):
         self.log_widget.appendPlainText(message)
     
@@ -74,20 +73,34 @@ class MainWindow(QMainWindow):
             self.positions_table.setItem(row_position, 1, QTableWidgetItem(str(pos.position)))
         QTimer.singleShot(5000, self.update_positions)  # Schedule next update
 
+    def closeEvent(self, event):
+        try:
+            print("Cleaning up resources...")
+            self.chart.toolbox.export_drawings("drawings.json")
+            if self.chart.ib.isConnected():
+                self.chart.ib.disconnect()
+        except Exception as e:
+            print(f"Error during cleanup: {e}")
+        finally:
+            loop = asyncio.get_event_loop()
+            if loop.is_running():
+                loop.stop()
+            event.accept()
+
+
 
 async def main(api_key):
-    app = QApplication(sys.argv)
-    qloop = qasync.QEventLoop(app)
-    asyncio.set_event_loop(qloop)
-    
     main_window = MainWindow(api_key=api_key)
     main_window.show()
     
-    with qloop:
-        await qloop.run_forever()
 
 if __name__ == '__main__':
-    try:
-        asyncio.run(main(api_key="4EMv8sLwboYtrmq15pFTZdNO2aRv8yUF"))
-    except KeyboardInterrupt:
-        print("Application closed by user")
+    app = QApplication(sys.argv)
+    loop = qasync.QEventLoop(app)
+    asyncio.set_event_loop(loop)
+
+    loop.create_task(main(api_key="4EMv8sLwboYtrmq15pFTZdNO2aRv8yUF"))
+
+    loop.run_forever()
+
+    loop.close()
