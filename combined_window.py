@@ -63,6 +63,29 @@ if QWebEngineView:
                     order_type = 'Stop'
             if security == 'Stock':
                 contract = Stock(ticker, 'SMART', 'USD')
+
+            elif security == 'Forex':
+                contract = Forex(ticker)
+            
+            elif security == 'Index':
+                contract = Index(ticker)
+
+            elif security == 'Option':
+                symbol_all = ticker
+                match = re.match(r"([A-Z]+)(\d{6})([CP])(\d+)", symbol_all)
+                if match:
+                    symbol = match.group(1)
+                    lastdate = match.group(2)
+                    right = match.group(3)
+                    strike = match.group(4)
+
+                    lastdate_formatted = f"20{lastdate}"
+
+                    strike_price = float(strike) / 1000  
+                
+                    contract = Option(symbol=ticker, exchange='SMART', currency='USD', lastTradeDateOrContractMonth=lastdate_formatted, right=right, strike=strike_price)
+
+            if contract:
                 if order_type == 'Limit':
                     print("Placing limit order")
                     limit_price = line_price
@@ -274,6 +297,29 @@ class PolygonQChart(QtChart):
             return
         if chart.topbar['security'].value == 'Stock':
             contract = Stock(chart.topbar['symbol'].value, 'SMART', 'USD')
+            
+        elif chart.topbar['security'].value == 'Option':
+            symbol_all = chart.topbar['symbol'].value
+            match = re.match(r"([A-Z]+)(\d{6})([PC])(\d+)", symbol_all)
+            if match:
+                symbol = match.group(1)
+                lastdate = match.group(2)
+                right = match.group(3)
+                strike = match.group(4)
+
+                lastdate_formatted = f"20{lastdate}"
+
+                strike_price = float(strike) / 1000  
+            
+            contract = Option(symbol=symbol, exchange='SMART', currency='USD', lastTradeDateOrContractMonth=lastdate_formatted, right=right, strike=strike_price)
+        
+        elif chart.topbar['security'].value == 'Forex':
+            contract = Forex(chart.topbar['symbol'].value)
+        
+        elif chart.topbar['security'].value == 'Index':
+            contract = Index(chart.topbar['symbol'].value)
+
+        if contract:
             market_order = MarketOrder(operation, quantity, account = self.account)
             market_trade = self.ib.placeOrder(contract, market_order)
 
