@@ -88,20 +88,15 @@ if QWebEngineView:
             if contract:
                 if order_type == 'Limit':
                     print("Placing limit order")
-                    limit_price = line_price
+                    limit_price = round(line_price, 2)
                     limit_order = LimitOrder(operation, quantity, limit_price, account=self.chart.account)
-                    limit_trade = self.chart.ib.placeOrder(contract, limit_order)
-                    await asyncio.sleep(1)
-                    print("Order status:", limit_trade.orderStatus.status)
-                    print("Order log:", limit_trade.log)
+                    limit_trade = self.chart.ib.placeOrder(contract, limit_order)   
+
                 elif order_type == 'Stop':
                     print("Placing stop order")
-                    stop_price = line_price
+                    stop_price = round(line_price, 2)
                     stop_order = StopOrder(operation, quantity, stop_price, account=self.chart.account)
                     stop_trade = self.chart.ib.placeOrder(contract, stop_order)
-                    await asyncio.sleep(1)
-                    print("Order status:", stop_trade.orderStatus.status)
-                    print("Order log:", stop_trade.log)
                     
 
 def emit_callback(window, string):
