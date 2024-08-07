@@ -15,6 +15,7 @@ import re
 import pytz
 from forex_python.converter import CurrencyCodes
 from ib_insync import *
+import json
 
 if QWebEngineView:
     class Bridge(QObject):
@@ -40,13 +41,15 @@ if QWebEngineView:
         def getCurrentQuantity(self):
             return self.chart.get_current_quantity()
         
-        @asyncSlot(float)
-        async def handleHorizontalLineOrder(self, line_price):
+        @Slot(float, str, int, bool, result=str)
+        def handleHorizontalLineOrder(self, line_price, operation='', quantity=0, update=False):
             ticker = self.chart.topbar['symbol'].value
-            operation = self.chart.topbar['order'].value
-            quantity = self.chart.topbar['quantity'].value
             current_price = self.chart._last_bar['close']
             security = self.chart.topbar['security'].value
+
+            if not update:
+                operation = self.chart.topbar['order'].value
+                quantity = self.chart.topbar['quantity'].value
             
             if not quantity:
                 print("No quantity entered")
@@ -90,14 +93,27 @@ if QWebEngineView:
                     print("Placing limit order")
                     limit_price = round(line_price, 2)
                     limit_order = LimitOrder(operation, quantity, limit_price, account=self.chart.account)
-                    limit_trade = self.chart.ib.placeOrder(contract, limit_order)   
+                    trade = self.chart.ib.placeOrder(contract, limit_order)   
 
                 elif order_type == 'Stop':
                     print("Placing stop order")
                     stop_price = round(line_price, 2)
                     stop_order = StopOrder(operation, quantity, stop_price, account=self.chart.account)
-                    stop_trade = self.chart.ib.placeOrder(contract, stop_order)
+                    trade = self.chart.ib.placeOrder(contract, stop_order)
                     
+            if trade:
+                order_id = trade.order.orderId
+                perm_id = trade.order.permId
+                client_id = trade.order.clientId
+                print("Order ID:", order_id, "Perm ID:", perm_id, "Client ID:", client_id)
+                data = {'orderId': order_id, 'permId': perm_id, 'clientId': client_id, 'operation': operation}
+                return json.dumps(data)
+            
+        @Slot(int, int, int)
+        def handleCancelOrder(self, order_id, perm_id, client_id):
+            self.chart.ib.cancelOrder(Order(orderId=order_id, permId=perm_id, clientId=client_id))
+            print(f"Order {order_id} cancelled")
+        
 
 def emit_callback(window, string):
     func, args = parse_event_message(window, string)

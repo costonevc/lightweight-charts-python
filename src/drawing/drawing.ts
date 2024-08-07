@@ -138,7 +138,11 @@ export abstract class Drawing extends PluginBase {
             logical: param.logical,
             price: barPrice.valueOf(),
             quantity: quantity,
-            ticker: ticker
+            ticker: ticker,
+            orderId: null,
+            permId: null,
+            clientId: null,
+            operation: null
         }
     }
 

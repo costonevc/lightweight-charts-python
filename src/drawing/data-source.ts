@@ -9,6 +9,10 @@ export interface Point {
     price: number;
     quantity: number;
     ticker: string;
+    orderId: number | null;
+    permId: number | null;
+    clientId: number | null;
+    operation: string;
 }
 
 export interface DiffPoint {

@@ -29,6 +29,8 @@ export class HorizontalLine extends Drawing {
         this._priceAxisViews = [new HorizontalLineAxisView(this)];
 
         this._callbackName = callbackName;
+
+        this._childHandleMouseUpInteraction = this._childHandleMouseUpInteraction.bind(this);
     }
 
     public get points() {
@@ -91,9 +93,21 @@ export class HorizontalLine extends Drawing {
         return this._moveToState(InteractionState.DRAGGING);
     }
 
-    protected _childHandleMouseUpInteraction = () => {
+    protected async _childHandleMouseUpInteraction(): Promise<void> {
         this._handleMouseUpInteraction();
         window.pythonObject.log_message(`Moved ${this._point.quantity} of ${this._point.ticker} to price: ${this._point.price}`);
+        window.pythonObject.handleCancelOrder(this._point.orderId, this._point.permId, this._point.clientId);
+        let update = true;
+        const result = await window.pythonObject.handleHorizontalLineOrder(this._point.price, this._point.operation, this._point.quantity, update);
+        const data = JSON.parse(result);
+    
+        const { orderId, permId, clientId, operation} = data;
+        console.log('order id:', orderId, 'perm id:', permId, 'client id:', clientId, 'operation:', operation);
+        this._point.orderId = orderId;
+        this._point.permId = permId;
+        this._point.clientId = clientId;
+        this._point.operation = operation;
+
         if (!this._callbackName) return;
         window.callbackFunction(`${this._callbackName}_~_${this._point.price.toFixed(8)}`);
     }

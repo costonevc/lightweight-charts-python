@@ -99,15 +99,31 @@ export class DrawingTool {
         if (this._activeDrawing == null) {
             if (this._drawingType == null) return;
 
-            this._activeDrawing = new this._drawingType(point, point);
-            this._series.attachPrimitive(this._activeDrawing);
+            // this._activeDrawing = new this._drawingType(point, point);
+            // this._series.attachPrimitive(this._activeDrawing);
             if (this._drawingType == HorizontalLine) {
-                window.pythonObject.handleHorizontalLineOrder(point.price);
-                
+                let update = false
+                const result = await window.pythonObject.handleHorizontalLineOrder(point.price, '', 0, update);
+                const data = JSON.parse(result);
+    
+                const { orderId, permId, clientId, operation} = data;
+                console.log('order id:', orderId, 'perm id:', permId, 'client id:', clientId, 'operation:', operation);
+                point.orderId = orderId;
+                point.permId = permId;
+                point.clientId = clientId;
+                point.operation = operation;
+
+
+                this._activeDrawing = new this._drawingType(point, point);
+                this._series.attachPrimitive(this._activeDrawing);
+
                 window.pythonObject.log_message(`Added horizontal line at price: ${point.price}`);
                 window.pythonObject.log_message(`Buy ${point.quantity} of ${point.ticker} at ${point.price}`);
                 
                 this._onClick(param);
+            } else {
+                this._activeDrawing = new this._drawingType(point, point);
+                this._series.attachPrimitive(this._activeDrawing);
             }
         }
         else {

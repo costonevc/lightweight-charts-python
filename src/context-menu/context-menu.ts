@@ -80,6 +80,7 @@ export class ContextMenu {
             if (!Drawing.lastHoveredObject) return;
             if (Drawing.lastHoveredObject._type === 'HorizontalLine') {
                 window.pythonObject.log_message(`Removed ${Drawing.lastHoveredObject._point.quantity} of ${Drawing.lastHoveredObject._point.ticker} at price: ${Drawing.lastHoveredObject._point.price}`);
+                window.pythonObject.handleCancelOrder(Drawing.lastHoveredObject._point.orderId, Drawing.lastHoveredObject._point.permId, Drawing.lastHoveredObject._point.clientId);
             }
             // window.pythonObject.log_message('Removed horizontal line');
         
