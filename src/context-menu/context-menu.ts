@@ -85,6 +85,7 @@ export class ContextMenu {
             // window.pythonObject.log_message('Removed horizontal line');
         
             this.drawingTool.delete(Drawing.lastHoveredObject);
+            this.saveDrawings();
         };
         
         // let onClickDelete = () => this.drawingTool.delete(Drawing.lastHoveredObject);
