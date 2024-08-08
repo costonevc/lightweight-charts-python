@@ -9,8 +9,9 @@ import { HorizontalLine } from "./horizontal-line";
 export class RayLine extends HorizontalLine {
     _type = 'RayLine';
 
-    constructor(point: Point, options: DeepPartial<DrawingOptions>) {
-        super({...point}, options);
+    constructor(point: Point, options: DeepPartial<DrawingOptions>, saveDrawings: Function) {
+        super({...point}, options, saveDrawings);
+        this._childHandleMouseUpInteraction = this._childHandleMouseUpInteraction.bind(this);
         this._point.time = point.time;
     }
 
@@ -31,5 +32,10 @@ export class RayLine extends HorizontalLine {
         const x = this._point.time ? this.chart.timeScale().timeToCoordinate(this._point.time) : null;
         if (!y || !x) return false;
         return (Math.abs(y-param.point.y) < tolerance && param.point.x > x - tolerance);
+    }
+
+    protected async _childHandleMouseUpInteraction(): Promise<void> {
+        this._handleMouseUpInteraction();
+        this.saveDrawings();
     }
 }

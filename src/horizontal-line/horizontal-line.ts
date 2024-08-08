@@ -21,7 +21,7 @@ export class HorizontalLine extends Drawing {
 
     protected _startDragPoint: Point | null = null;
 
-    constructor(point: Point, options: DeepPartial<DrawingOptions>, private saveDrawings: Function, callbackName=null) {
+    constructor(point: Point, options: DeepPartial<DrawingOptions>, protected saveDrawings: Function, callbackName=null) {
         super(options)
         this._point = point;
         this._point.time = null;    // time is null for horizontal lines

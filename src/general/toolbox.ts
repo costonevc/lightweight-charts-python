@@ -169,7 +169,7 @@ export class ToolBox {
                     this._drawingTool.addNewDrawing(new HorizontalLine(d.points[0], d.options, this.saveDrawings));
                     break;
                 case "RayLine":
-                    this._drawingTool.addNewDrawing(new RayLine(d.points[0], d.options));
+                    this._drawingTool.addNewDrawing(new RayLine(d.points[0], d.options, this.saveDrawings));
                     break;
                 case "VerticalLine":
                     this._drawingTool.addNewDrawing(new VerticalLine(d.points[0], d.options, this.saveDrawings));
