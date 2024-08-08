@@ -113,12 +113,14 @@ export class DrawingTool {
                 point.clientId = clientId;
                 point.operation = operation;
 
+                const operationColor = point.operation === 'Buy' ? 'rgba(72, 222, 14, 1)' : point.operation === 'Sell' ? 'rgba(181, 9, 17, 1)' : '#1E80F0';
 
                 this._activeDrawing = new this._drawingType(point, point, this.saveDrawings);
+                this._activeDrawing.applyOptions({lineColor: operationColor});
                 this._series.attachPrimitive(this._activeDrawing);
 
                 window.pythonObject.log_message(`Added horizontal line at price: ${point.price}`);
-                window.pythonObject.log_message(`Buy ${point.quantity} of ${point.ticker} at ${point.price}`);
+                window.pythonObject.log_message(`${point.operation} ${point.quantity} of ${point.ticker} at ${point.price}`);
                 
                 this._onClick(param);
             } else {

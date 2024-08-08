@@ -200,7 +200,7 @@ class PolygonQChart(QtChart):
 
         self.topbar.textbox('quantity', '1', func=self._on_quantity_textbox)
 
-        self.topbar.switcher('order', order_options)
+        self.topbar.switcher('order', order_options, func=self._on_operation_selection)
         self.topbar.button('market', 'Place Market Order', func=self._on_market_order)
 
         self.toolbox.import_drawings("drawings.json")
@@ -289,6 +289,8 @@ class PolygonQChart(QtChart):
         print("Timeframe selection changed")
         await self._polygon(chart.topbar['symbol'].value) if chart.topbar['symbol'].value else None
 
+    async def _on_operation_selection(self, chart):
+        print("Operation selection changed")
 
     async def _on_quantity_textbox(self, chart):
         print("Quantity textbox changed")
