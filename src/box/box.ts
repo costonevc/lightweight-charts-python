@@ -27,6 +27,7 @@ export class Box extends TwoPointDrawing {
     constructor(
         p1: Point,
         p2: Point,
+        private saveDrawings: Function,
         options?: Partial<BoxOptions>
     ) {
         super(p1, p2, options);
@@ -61,7 +62,7 @@ export class Box extends TwoPointDrawing {
             case InteractionState.HOVERING:
                 document.body.style.cursor = "pointer";
                 this._hovered = true;
-                this._unsubscribe("mouseup", this._handleMouseUpInteraction);
+                this._unsubscribe("mouseup", this._childHandleMouseUpInteraction);
                 this._subscribe("mousedown", this._handleMouseDownInteraction)
                 this.chart.applyOptions({handleScroll: true});
                 break;
@@ -72,8 +73,8 @@ export class Box extends TwoPointDrawing {
             case InteractionState.DRAGGINGP4:
             case InteractionState.DRAGGING:
                 document.body.style.cursor = "grabbing";
-                document.body.addEventListener("mouseup", this._handleMouseUpInteraction);
-                this._subscribe("mouseup", this._handleMouseUpInteraction);
+                document.body.addEventListener("mouseup", this._childHandleMouseUpInteraction);
+                this._subscribe("mouseup", this._childHandleMouseUpInteraction);
                 this.chart.applyOptions({handleScroll: false});
                 break;
         }
@@ -147,6 +148,11 @@ export class Box extends TwoPointDrawing {
 
         return mouseX > mainX-halfTolerance && mouseX < mainX+width+halfTolerance &&
             mouseY > mainY-halfTolerance && mouseY < mainY+height+halfTolerance;
+    }
+
+    protected _childHandleMouseUpInteraction = () => {
+        this._handleMouseUpInteraction();
+        this.saveDrawings();
     }
 }
 

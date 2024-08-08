@@ -16,7 +16,8 @@ export class TrendLine extends TwoPointDrawing {
     constructor(
         p1: Point,
         p2: Point,
-        options?: Partial<DrawingOptions>
+        private saveDrawings: Function,
+        options?: Partial<DrawingOptions>,
     ) {
         super(p1, p2, options)
         this._paneViews = [new TrendLinePaneView(this)];
@@ -37,7 +38,7 @@ export class TrendLine extends TwoPointDrawing {
                 this._hovered = true;
                 this.requestUpdate();
                 this._subscribe("mousedown", this._handleMouseDownInteraction);
-                this._unsubscribe("mouseup", this._handleMouseUpInteraction);
+                this._unsubscribe("mouseup", this._childHandleMouseUpInteraction);
                 this.chart.applyOptions({handleScroll: true});
                 break;
 
@@ -45,7 +46,7 @@ export class TrendLine extends TwoPointDrawing {
             case InteractionState.DRAGGINGP2:
             case InteractionState.DRAGGING:
                 document.body.style.cursor = "grabbing";
-                this._subscribe("mouseup", this._handleMouseUpInteraction);
+                this._subscribe("mouseup", this._childHandleMouseUpInteraction);
                 this.chart.applyOptions({handleScroll: false});
                 break;
         }
@@ -106,4 +107,10 @@ export class TrendLine extends TwoPointDrawing {
 
         return distance <= tolerance
     }
+
+    protected _childHandleMouseUpInteraction = () => {
+        this._handleMouseUpInteraction();
+        this.saveDrawings();
+    }
+
 }

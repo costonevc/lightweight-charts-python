@@ -38,31 +38,5 @@
                 "style": 0
             }
         }
-    ],
-    "HCP": [
-        {
-            "type": "RayLine",
-            "points": [
-                {
-                    "time": 1723040880,
-                    "logical": 291,
-                    "price": 33.51008636644046
-                }
-            ],
-            "options": {
-                "lineColor": "#1E80F0",
-                "lineStyle": 0,
-                "width": 4,
-                "time": 1723042140,
-                "logical": 310,
-                "price": 33.53807834669957,
-                "quantity": "1",
-                "ticker": "HCP",
-                "orderId": null,
-                "permId": null,
-                "clientId": null,
-                "operation": null
-            }
-        }
     ]
 }

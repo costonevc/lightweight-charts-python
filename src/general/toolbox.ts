@@ -160,10 +160,10 @@ export class ToolBox {
         drawings.forEach((d) => {
             switch (d.type) {
                 case "Box":
-                    this._drawingTool.addNewDrawing(new Box(d.points[0], d.points[1], d.options));
+                    this._drawingTool.addNewDrawing(new Box(d.points[0], d.points[1], this.saveDrawings, d.options));
                     break;
                 case "TrendLine":
-                    this._drawingTool.addNewDrawing(new TrendLine(d.points[0], d.points[1], d.options));
+                    this._drawingTool.addNewDrawing(new TrendLine(d.points[0], d.points[1], this.saveDrawings, d.options));
                     break;
                 case "HorizontalLine":
                     this._drawingTool.addNewDrawing(new HorizontalLine(d.points[0], d.options, this.saveDrawings));
