@@ -38,7 +38,7 @@ export class ToolBox {
     constructor(handlerID: string, chart: IChartApi, series: ISeriesApi<SeriesType>, commandFunctions: Function[]) {
         this._handlerID = handlerID;
         this._commandFunctions = commandFunctions;
-        this._drawingTool = new DrawingTool(chart, series, () => this.removeActiveAndSave());
+        this._drawingTool = new DrawingTool(chart, series, this.saveDrawings, () => this.removeActiveAndSave());
         this.div = this._makeToolBox()
         new ContextMenu(this.saveDrawings, this._drawingTool);
 
@@ -166,13 +166,13 @@ export class ToolBox {
                     this._drawingTool.addNewDrawing(new TrendLine(d.points[0], d.points[1], d.options));
                     break;
                 case "HorizontalLine":
-                    this._drawingTool.addNewDrawing(new HorizontalLine(d.points[0], d.options));
+                    this._drawingTool.addNewDrawing(new HorizontalLine(d.points[0], d.options, this.saveDrawings));
                     break;
                 case "RayLine":
                     this._drawingTool.addNewDrawing(new RayLine(d.points[0], d.options));
                     break;
                 case "VerticalLine":
-                    this._drawingTool.addNewDrawing(new VerticalLine(d.points[0], d.options));
+                    this._drawingTool.addNewDrawing(new VerticalLine(d.points[0], d.options, this.saveDrawings));
                     break;
             }
         })

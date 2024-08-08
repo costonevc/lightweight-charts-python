@@ -24,7 +24,7 @@ export class DrawingTool {
     private _isDrawing: boolean = false;
     private _drawingType: (new (...args: any[]) => Drawing) | null = null;
 
-    constructor(chart: IChartApi, series: ISeriesApi<SeriesType>, finishDrawingCallback: Function | null = null) {
+    constructor(chart: IChartApi, series: ISeriesApi<SeriesType>, private saveDrawings: Function, finishDrawingCallback: Function | null = null) {
         this._chart = chart;
         this._series = series;
         this._finishDrawingCallback = finishDrawingCallback;
@@ -114,7 +114,7 @@ export class DrawingTool {
                 point.operation = operation;
 
 
-                this._activeDrawing = new this._drawingType(point, point);
+                this._activeDrawing = new this._drawingType(point, point, this.saveDrawings);
                 this._series.attachPrimitive(this._activeDrawing);
 
                 window.pythonObject.log_message(`Added horizontal line at price: ${point.price}`);
@@ -122,7 +122,7 @@ export class DrawingTool {
                 
                 this._onClick(param);
             } else {
-                this._activeDrawing = new this._drawingType(point, point);
+                this._activeDrawing = new this._drawingType(point, point, this.saveDrawings);
                 this._series.attachPrimitive(this._activeDrawing);
             }
         }

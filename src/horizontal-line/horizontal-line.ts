@@ -21,7 +21,7 @@ export class HorizontalLine extends Drawing {
 
     protected _startDragPoint: Point | null = null;
 
-    constructor(point: Point, options: DeepPartial<DrawingOptions>, callbackName=null) {
+    constructor(point: Point, options: DeepPartial<DrawingOptions>, private saveDrawings: Function, callbackName=null) {
         super(options)
         this._point = point;
         this._point.time = null;    // time is null for horizontal lines
@@ -107,6 +107,8 @@ export class HorizontalLine extends Drawing {
         this._point.permId = permId;
         this._point.clientId = clientId;
         this._point.operation = operation;
+
+        this.saveDrawings();
 
         if (!this._callbackName) return;
         window.callbackFunction(`${this._callbackName}_~_${this._point.price.toFixed(8)}`);

@@ -21,7 +21,7 @@ export class VerticalLine extends Drawing {
 
     protected _startDragPoint: Point | null = null;
 
-    constructor(point: Point, options: DeepPartial<DrawingOptions>, callbackName=null) {
+    constructor(point: Point, options: DeepPartial<DrawingOptions>, private saveDrawings: Function, callbackName=null) {
         super(options)
         this._point = point;
         this._paneViews = [new VerticalLinePaneView(this)];
@@ -105,6 +105,9 @@ export class VerticalLine extends Drawing {
 
     protected _childHandleMouseUpInteraction = () => {
         this._handleMouseUpInteraction();
+
+        this.saveDrawings();
+        
         if (!this._callbackName) return;
         window.callbackFunction(`${this._callbackName}_~_${this._point.price.toFixed(8)}`);
     }
