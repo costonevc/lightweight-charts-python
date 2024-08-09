@@ -1,10 +1,9 @@
-from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QPlainTextEdit, QInputDialog, QLineEdit, QHBoxLayout, QTableWidget, QTableWidgetItem
+from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget, QPlainTextEdit, QHBoxLayout, QTableWidget, QTableWidgetItem
 from PyQt5.QtCore import QTimer
 import sys
 import asyncio
 import qasync
 from combined_window import PolygonQChart
-from functools import partial
 from ib_insync import *
 
 class MainWindow(QMainWindow):

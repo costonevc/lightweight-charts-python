@@ -1,8 +1,7 @@
-from PyQt5.QtWidgets import QWidget, QApplication, QTableWidgetItem, QTableWidget
+from PyQt5.QtWidgets import QWidget, QApplication
 from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage
 from PyQt5.QtWebChannel import QWebChannel
 from PyQt5.QtCore import QObject, pyqtSlot as Slot, QUrl, QTimer
-# from lightweight_charts.widgets import QtChart
 from lightweight_charts import abstract
 from lightweight_charts.util import parse_event_message
 import asyncio
@@ -404,27 +403,3 @@ class PolygonQChart(QtChart):
         # Default to Stock
         return 'Stock'
         
-
-async def main():
-    app = QApplication.instance() or QApplication(sys.argv)
-    qloop = qasync.QEventLoop(app)
-    asyncio.set_event_loop(qloop)
-
-    chart = PolygonQChart(
-        api_key="q0TtwNDqD1yz2pnD96HDLOBTMSKVh2Zl",
-        width=1000,
-        height=800,
-        live=False
-    )
-
-    chart.show()
-
-    # Keep the event loop running
-    while True:
-        await asyncio.sleep(0.1)
-
-if __name__ == '__main__':
-    try:
-        qasync.run(main())
-    except KeyboardInterrupt:
-        print("Application closed by user")
