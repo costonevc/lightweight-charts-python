@@ -1,23 +1,115 @@
 # Change
-To run the application, execute the `combined_test.py` script:
 
-```bash
-python combined_test.py
-```
+## Introduction
 
-(You can toggle between live and historical data by setting the live parameter)
+This project builds upon the lightweight-charts-python library by introducing a new class `PolygonQchart` defined in `combined_window.py`, which merges functionality from `Polygonchart` and `Qtchart` (PyQt5). This integration utilizes the `ib_insync` library to work with the Trader Workstation API from Interactive Brokers. The data source is provided by Polygon. This application is designed to interact dynamically with market data and execute trading strategies effectively.
 
-## Symbol Formatting
-- **Stock**: Just use the ticker symbol.
-  - Example: `AAPL`
-- **Option**: Use the full option chain identifier.
-  - Example: `SPY251219C00650000`
-- **Index**: Start with a caret (`^`).
-  - Example: `^SPX`
-- **Forex**: Use the currency pair code.
-  - Example: `EURUSD`
-- **Crypto**: Include a hyphen between the base and quote currencies.
-  - Example: `BTC-USD`
+## Prerequisites
+For an isolated package installation, it's recommended to create and activate a virtual environment:
+
+### Create and Activate Virtual Environment
+
+- **Create venv:**
+
+  ```bash
+  $ python -m venv venv
+  ```
+
+For an isolated package installation, it's recommended to create and activate a virtual environment:
+
+- **Activation:**
+
+  ```bash
+  # Linux/Mac
+  $ source venv/bin/activate
+
+  # Windows
+  # Command Prompt
+  $ venv\Scripts\activate.bat
+  # PowerShell
+  $ venv\Scripts\Activate.ps1
+  ```
+
+### Install Required Packages**
+
+  ```bash
+  $ pip install -r requirements.txt
+  ```
+
+### Running the Application**
+    
+  ```bash
+  python combined_test.py
+  ```
+
+## Configuration
+
+- Replace the API key in `combined_test.py` at line 101:
+
+  ```bash
+  loop.create_task(main(api_key="<YOUR_API_KEY>"))
+  ```
+
+- Interactive Brokers parameters need to be adjusted in `combined_window.py` at lines 180 and 218, and in `combined_test.py` at line 67:
+
+  ```bash
+  # combined_window.py line 180
+  self.account = 'DU8014278'
+  # combined_window.py line 218
+  await self.ib.connectAsync('127.0.0.1', 7497, clientId=10)
+  # combined_test.py line 67
+  positions = self.chart.ib.positions(account='DU8014278')
+  ```
+
+- If you do not wish to use real-time data or if your API key does not have real-time permissions, change `live=True` to `False` in `combined_test.py` at line 20:
+
+  ```bash
+  self.chart = PolygonQChart(api_key=api_key, widget=widget, width=750, height=600, live=True)
+  ```
+
+## GUI Features
+
+![GUI](GUI.jpg)
+
+### Chart
+
+- Trigger the search function with `Ctrl-F` to input a symbol. Ensure the symbol follows specific formats:
+
+    - **Stock**: Just use the ticker symbol.
+        - Example: `AAPL`
+    - **Option**: Use the full option chain identifier.
+        - Example: `SPY251219C00650000`
+    - **Index**: Start with a caret (`^`).
+        - Example: `^SPX`
+    - **Forex**: Use the currency pair code.
+        - Example: `EURUSD`
+    - **Crypto**: Include a hyphen between the base and quote currencies.
+        - Example: `BTC-USD`
+
+- Utilize the toolbox on the left to draw horizontal lines, vertical lines, boxes, trendlines, and ray lines.
+- Creating a horizontal line takes into account the `Quantity` and `Buy/Sell` options from the topbar, aligning the line price with the current market price to create corresponding orders sent to the Interactive Brokers platform.
+- Dragging a horizontal line updates both the line and the associated order; right-click to delete.
+- All drawings are stored under the corresponding symbol, maintaining state between sessions and program restarts, with drawings persisted in `drawings.json`.
+
+### Sidebar (TableWidget)
+
+- Displays symbols and quantities for positions in the account.
+- Clicking a symbol navigates to its chart data.
+- Refreshes periodically.
+
+### Topbar
+
+- Displays the current symbol, a timeframe switcher, security type (auto-detected based on the queried symbol), a quantity textbox, operation switcher, and a market order button.
+
+### LogWidget
+
+- Logs messages when horizontal lines are added, updated, or removed.
+
+## References
+[Trading View](https://tradingview.github.io/lightweight-charts/docs/api)
+[Polygon](https://polygon.io/docs/stocks/getting-started)
+[lightweight-charts-python](https://lightweight-charts-python.readthedocs.io/en/latest/tutorials/getting_started.html)
+[ib_insync](https://ib-insync.readthedocs.io/readme.html)
 
 <div align="center">
 
