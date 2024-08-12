@@ -107,8 +107,11 @@ For an isolated package installation, it's recommended to create and activate a 
 
 ## References
 [Trading View](https://tradingview.github.io/lightweight-charts/docs/api)
+
 [Polygon](https://polygon.io/docs/stocks/getting-started)
+
 [lightweight-charts-python](https://lightweight-charts-python.readthedocs.io/en/latest/tutorials/getting_started.html)
+
 [ib_insync](https://ib-insync.readthedocs.io/readme.html)
 
 <div align="center">
