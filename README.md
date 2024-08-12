@@ -30,13 +30,13 @@ For an isolated package installation, it's recommended to create and activate a 
   $ venv\Scripts\Activate.ps1
   ```
 
-### Install Required Packages**
+### Install Required Packages
 
   ```bash
   $ pip install -r requirements.txt
   ```
 
-### Running the Application**
+### Running the Application
     
   ```bash
   python combined_test.py
