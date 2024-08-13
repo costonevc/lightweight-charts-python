@@ -102,11 +102,14 @@ export class HorizontalLine extends Drawing {
         const data = JSON.parse(result);
     
         const { orderId, permId, clientId, operation} = data;
-        console.log('order id:', orderId, 'perm id:', permId, 'client id:', clientId, 'operation:', operation);
+        // console.log('order id:', orderId, 'perm id:', permId, 'client id:', clientId, 'operation:', operation);
         this._point.orderId = orderId;
         this._point.permId = permId;
         this._point.clientId = clientId;
         this._point.operation = operation;
+
+        let formattedPrice = this._point.price.toFixed(2);
+        this.applyOptions({text: `${this._point.operation} ${this._point.quantity} @ ${formattedPrice}`});
 
         this.saveDrawings();
 

@@ -69,7 +69,7 @@ For an isolated package installation, it's recommended to create and activate a 
 
 ## GUI Features
 
-![GUI](GUI.jpg)
+![GUI](GUI_2.jpg)
 
 ### Chart
 

@@ -107,7 +107,7 @@ export class DrawingTool {
                 const data = JSON.parse(result);
     
                 const { orderId, permId, clientId, operation} = data;
-                console.log('order id:', orderId, 'perm id:', permId, 'client id:', clientId, 'operation:', operation);
+                // console.log('order id:', orderId, 'perm id:', permId, 'client id:', clientId, 'operation:', operation);
                 point.orderId = orderId;
                 point.permId = permId;
                 point.clientId = clientId;
@@ -117,6 +117,8 @@ export class DrawingTool {
 
                 this._activeDrawing = new this._drawingType(point, point, this.saveDrawings);
                 this._activeDrawing.applyOptions({lineColor: operationColor});
+                let formattedPrice = point.price.toFixed(2);
+                this._activeDrawing.applyOptions({text: `${point.operation} ${point.quantity} @ ${formattedPrice}`});
                 this._series.attachPrimitive(this._activeDrawing);
 
                 window.pythonObject.log_message(`Added horizontal line at price: ${point.price}`);
