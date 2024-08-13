@@ -76,7 +76,9 @@ export class ContextMenu {
                 subMenu._div.style.display = 'none'
             })
         }
+
         // Changed here, add callback to delete horizontal line
+        // when deleting a horizontal line, log the message and call the python function to cancel the order
         let onClickDelete = () => {
             if (!Drawing.lastHoveredObject) return;
             if (Drawing.lastHoveredObject._type === 'HorizontalLine') {

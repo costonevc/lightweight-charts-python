@@ -157,6 +157,7 @@ export class ToolBox {
     }
 
     // Changed here, pass in the saveDrawings method
+    // This method is called from the chart when the chart is loaded
     loadDrawings(drawings: any[]) { // TODO any
         drawings.forEach((d) => {
             switch (d.type) {

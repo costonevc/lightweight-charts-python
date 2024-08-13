@@ -115,7 +115,7 @@ For an isolated package installation, it's recommended to create and activate a 
   npx rollup -c
   ```
 
-- Modify the `rollup.config.js` to change the output location of the compiled JavaScript files if necessary (or you need to manually move `bundle.js` from dist/ to lightweight_charts/js/). For debugging, adjust the `plugins` section to beautify the output, which helps in pinpointing the location of bugs:
+- Modify the `rollup.config.js` to change the output location of the compiled JavaScript files if necessary (or you need to manually move `bundle.js` from `dist/` to `lightweight_charts/js/`). For debugging, adjust the `plugins` section to beautify the output, which helps in pinpointing the location of bugs:
 
   ```bash
   plugins: [

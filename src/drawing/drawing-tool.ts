@@ -90,6 +90,8 @@ export class DrawingTool {
         }
     }
 
+    // Changed here, this is called when create new drawings using toolbox
+    // when creating a horizontal line, create the order and save the drawings
     private async _onClick(param: MouseEventParams) {
         if (!this._isDrawing) return;
 
@@ -118,7 +120,7 @@ export class DrawingTool {
                 const operationColor = point.operation === 'Buy' ? 'rgba(72, 222, 14, 1)' : point.operation === 'Sell' ? 'rgba(181, 9, 17, 1)' : '#1E80F0';
                 // create the horizontal line
                 this._activeDrawing = new this._drawingType(point, point, this.saveDrawings);
-                
+
                 // apply the color and text to the horizontal line
                 this._activeDrawing.applyOptions({lineColor: operationColor});
                 let formattedPrice = point.price.toFixed(2);

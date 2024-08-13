@@ -94,9 +94,9 @@ export class HorizontalLine extends Drawing {
     }
 
     // Changed here, listen for mouse up events
+    // when mouse is up, move the horizontal line to the new price, cancel the current order and create a new one, then save the drawings
     protected async _childHandleMouseUpInteraction(): Promise<void> {
         this._handleMouseUpInteraction();
-        // when mouse is up, move the horizontal line to the new price, cancel the current order and create a new one
         window.pythonObject.log_message(`Moved ${this._point.quantity} of ${this._point.ticker} to price: ${this._point.price}`);
         window.pythonObject.handleCancelOrder(this._point.orderId, this._point.permId, this._point.clientId);
         let update = true;

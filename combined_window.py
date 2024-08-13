@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QWidget, QApplication
+from PyQt5.QtWidgets import QWidget
 from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage
 from PyQt5.QtWebChannel import QWebChannel
 from PyQt5.QtCore import QObject, pyqtSlot as Slot, QUrl, QTimer
@@ -7,9 +7,6 @@ from lightweight_charts.util import parse_event_message
 import asyncio
 import datetime as dt
 import pandas as pd
-import qasync
-from qasync import asyncSlot
-import sys
 import re
 import pytz
 from forex_python.converter import CurrencyCodes
