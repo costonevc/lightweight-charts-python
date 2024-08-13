@@ -46,13 +46,13 @@ For an isolated package installation, it's recommended to create and activate a 
 
 - Replace the API key in `combined_test.py` at line 101:
 
-  ```bash
+  ```python
   loop.create_task(main(api_key="<YOUR_API_KEY>"))
   ```
 
 - Interactive Brokers parameters need to be adjusted in `combined_window.py` at lines 180 and 218, and in `combined_test.py` at line 67:
 
-  ```bash
+  ```python
   # combined_window.py line 180
   self.account = 'DU8014278'
   # combined_window.py line 218
@@ -63,7 +63,7 @@ For an isolated package installation, it's recommended to create and activate a 
 
 - If you do not wish to use real-time data or if your API key does not have real-time permissions, change `live=True` to `False` in `combined_test.py` at line 20:
 
-  ```bash
+  ```python
   self.chart = PolygonQChart(api_key=api_key, widget=widget, width=750, height=600, live=True)
   ```
 
@@ -117,7 +117,7 @@ For an isolated package installation, it's recommended to create and activate a 
 
 - Modify the `rollup.config.js` to change the output location of the compiled JavaScript files if necessary (or you need to manually move `bundle.js` from `dist/` to `lightweight_charts/js/`). For debugging, adjust the `plugins` section to beautify the output, which helps in pinpointing the location of bugs:
 
-  ```bash
+  ```js
   plugins: [
     typescript(),
     terser({
