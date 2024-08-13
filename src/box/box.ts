@@ -150,6 +150,7 @@ export class Box extends TwoPointDrawing {
             mouseY > mainY-halfTolerance && mouseY < mainY+height+halfTolerance;
     }
 
+    // Changed here, added saveDrawings
     protected _childHandleMouseUpInteraction = () => {
         this._handleMouseUpInteraction();
         this.saveDrawings();

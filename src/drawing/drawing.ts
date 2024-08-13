@@ -127,6 +127,7 @@ export abstract class Drawing extends PluginBase {
         }
     }
 
+    // Changed here, add async to get current quantity and ticker
     public static async _addEventToPoint(param: MouseEventParams, series: ISeriesApi<SeriesType>) {
         if (!series || !param.point || !param.logical) return null;
         const barPrice = series.coordinateToPrice(param.point.y);

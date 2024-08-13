@@ -173,7 +173,7 @@ class Events:
             wrapper=lambda func, c, *args: func(c, *[float(a) for a in args])
         )
 
-        # changed_here
+        # Changed here, added double click event
         self.double_click = JSEmitter(chart, f'subscribe_double_click{salt}',
             lambda o: chart.run_script(f'''
             let doubleClickHandler{salt} = (param) => {{

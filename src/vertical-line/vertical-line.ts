@@ -103,6 +103,7 @@ export class VerticalLine extends Drawing {
         return this._moveToState(InteractionState.DRAGGING);
     }
 
+    // Changed here, listen for mouse up events, save drawings after mouse up
     protected _childHandleMouseUpInteraction = () => {
         this._handleMouseUpInteraction();
 

@@ -195,6 +195,7 @@ class SeriesCommon(Pane):
             labels = [*labels, 'time']
         return labels
 
+    # Changed here, so that the time on the axis is converted to the correct timezone
     def _df_datetime_format(self, df: pd.DataFrame, exclude_lowercase=None):
         df = df.copy()
         df.columns = self._format_labels(df, df.columns, df.index, exclude_lowercase)
@@ -211,6 +212,7 @@ class SeriesCommon(Pane):
             ts = row['time']
             offset_seconds = ts.tzinfo.utcoffset(ts).total_seconds()
             new_ts = (ts - pd.Timestamp("1970-01-01", tz='America/New_York')) // pd.Timedelta(seconds=1)
+            # if the timezone is EDT, we need to add an hour to the timestamp
             if offset_seconds == -14400:
                 new_ts += 3600
             return new_ts

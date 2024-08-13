@@ -242,7 +242,8 @@ class PolygonAPI:
     def __init__(self, chart):
         self._chart = chart
 
-    def set(self, *args): # changed_here
+    # Changed here, create a new event loop if one does not exist
+    def set(self, *args): 
         # if asyncio.get_event_loop().is_running():
         #     asyncio.create_task(self.async_set(*args))
         #     return True
@@ -252,7 +253,7 @@ class PolygonAPI:
         try:
             loop = asyncio.get_event_loop()
         except RuntimeError as e:
-            loop = asyncio.new_event_loop()  # Create a new event loop if one does not exist
+            loop = asyncio.new_event_loop()  
             asyncio.set_event_loop(loop)
 
         if loop.is_running():

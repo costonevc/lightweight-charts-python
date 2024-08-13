@@ -76,6 +76,7 @@ export class ContextMenu {
                 subMenu._div.style.display = 'none'
             })
         }
+        // Changed here, add callback to delete horizontal line
         let onClickDelete = () => {
             if (!Drawing.lastHoveredObject) return;
             if (Drawing.lastHoveredObject._type === 'HorizontalLine') {

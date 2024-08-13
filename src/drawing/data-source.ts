@@ -4,6 +4,7 @@ import {
 } from 'lightweight-charts';
 
 export interface Point {
+    // Changed here, save more data in the point
     time: Time | null;
     logical: Logical;
     price: number;

@@ -38,7 +38,7 @@ export class ToolBox {
     constructor(handlerID: string, chart: IChartApi, series: ISeriesApi<SeriesType>, commandFunctions: Function[]) {
         this._handlerID = handlerID;
         this._commandFunctions = commandFunctions;
-        this._drawingTool = new DrawingTool(chart, series, this.saveDrawings, () => this.removeActiveAndSave());
+        this._drawingTool = new DrawingTool(chart, series, this.saveDrawings, () => this.removeActiveAndSave()); // Changed here, pass in the saveDrawing method
         this.div = this._makeToolBox()
         new ContextMenu(this.saveDrawings, this._drawingTool);
 
@@ -156,6 +156,7 @@ export class ToolBox {
         window.callbackFunction(`save_drawings${this._handlerID}_~_${string}`)
     }
 
+    // Changed here, pass in the saveDrawings method
     loadDrawings(drawings: any[]) { // TODO any
         drawings.forEach((d) => {
             switch (d.type) {

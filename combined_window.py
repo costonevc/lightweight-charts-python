@@ -17,6 +17,7 @@ from ib_insync import *
 import json
 
 if QWebEngineView:
+    # Define a bridge class to interact between Python and JavaScript
     class Bridge(QObject):
         def __init__(self, chart, mainwindow=None):
             super().__init__()
@@ -28,24 +29,30 @@ if QWebEngineView:
         def callback(self, message):
             emit_callback(self.win, message)
             
+        # Slot to log messages to the main window
         @Slot(str)
         def log_message(self, message):
             self.mainwindow.log_message(message)
 
+        # Slot to get the current symbol from the topbar
         @Slot(result=str)
         def getCurrentSymbol(self):
             return self.chart.get_current_symbol()
         
+        # Slot to get the current quantity from the topbar
         @Slot(result=str)
         def getCurrentQuantity(self):
             return self.chart.get_current_quantity()
         
+        # Slot to handle horizontal line order placement
         @Slot(float, str, int, bool, result=str)
         def handleHorizontalLineOrder(self, line_price, operation='', quantity=0, update=False):
             ticker = self.chart.topbar['symbol'].value
             current_price = self.chart._last_bar['close']
             security = self.chart.topbar['security'].value
 
+            # If the horizontal line is being dragged, update the order with original operation and quantity
+            # Otherwise, use the values from the topbar
             if not update:
                 operation = self.chart.topbar['order'].value
                 quantity = self.chart.topbar['quantity'].value
@@ -53,6 +60,8 @@ if QWebEngineView:
             if not quantity:
                 print("No quantity entered")
                 return
+            
+            # Determine the order type based on the line price and current price
             if operation == 'Buy':
                 if line_price < current_price:
                     order_type = 'Limit'
@@ -63,6 +72,8 @@ if QWebEngineView:
                     order_type = 'Limit'
                 else:
                     order_type = 'Stop'
+
+            # Create the contract according to the security type
             if security == 'Stock':
                 contract = Stock(ticker, 'SMART', 'USD')
 
@@ -87,6 +98,7 @@ if QWebEngineView:
                 
                     contract = Option(symbol=ticker, exchange='SMART', currency='USD', lastTradeDateOrContractMonth=lastdate_formatted, right=right, strike=strike_price)
 
+            # Place the order
             if contract:
                 if order_type == 'Limit':
                     print("Placing limit order")
@@ -99,7 +111,8 @@ if QWebEngineView:
                     stop_price = round(line_price, 2)
                     stop_order = StopOrder(operation, quantity, stop_price, account=self.chart.account)
                     trade = self.chart.ib.placeOrder(contract, stop_order)
-                    
+            
+            # Return the order details
             if trade:
                 order_id = trade.order.orderId
                 perm_id = trade.order.permId
@@ -110,6 +123,7 @@ if QWebEngineView:
             
         @Slot(int, int, int)
         def handleCancelOrder(self, order_id, perm_id, client_id):
+            # Cancel the order
             self.chart.ib.cancelOrder(Order(orderId=order_id, permId=perm_id, clientId=client_id))
             print(f"Order {order_id} cancelled")
         
@@ -118,6 +132,7 @@ def emit_callback(window, string):
     func, args = parse_event_message(window, string)
     asyncio.create_task(func(*args)) if asyncio.iscoroutinefunction(func) else func(*args)
 
+# Custom WebEnginePage class to handle JavaScript console messages
 class CustomWebEnginePage(QWebEnginePage):
     def javaScriptConsoleMessage(self, level, message, line, sourceID):
         print("JS Console:", message, "Line:", line, "Source:", sourceID)
@@ -211,7 +226,8 @@ class PolygonQChart(QtChart):
         # ''')
         # abstract.Window._return_q = PolygonQChart.WV.return_queue
         print("PolygonQChart initialization complete")
-    
+
+    # Connect to IB, change the IP and port and clientId if necessary
     async def connect_ib(self):
         util.patchAsyncio()
         try:
@@ -220,6 +236,7 @@ class PolygonQChart(QtChart):
         except Exception as e:
             print(f"Failed to connect IB: {str(e)}")
 
+    # Show the chart
     def show(self):
         print("Show method called")
         self.webview.show()
@@ -234,25 +251,31 @@ class PolygonQChart(QtChart):
         {self.id}.search.box.focus()
         ''')
     
+    # Get the current symbol from the topbar
     def get_current_symbol(self):
         return self.topbar['symbol'].value
     
+    # Get the current quantity from the topbar
     def get_current_quantity(self):
         return self.topbar['quantity'].value
-
+    
+    # Initialize the bridge object
     def init_bridge(self, mainwindow):
         self.bridge = Bridge(self, mainwindow)
         self.web_channel.registerObject('bridge', self.bridge)
 
+    # Fetch data from Polygon
     async def _polygon(self, symbol):
         print(f"Fetching data for {symbol}")
         self.spinner(True)
         self.set(pd.DataFrame(), True)
         self.crosshair(vert_visible=False, horz_visible=False)
+        # Get the timeframe and convert it to a timedelta
         mult, span = self._convert_timeframe(self.topbar['timeframe'].value)
         delta = dt.timedelta(**{span + 's': int(mult)})
         short_delta = (delta < dt.timedelta(days=7))
         start_date = dt.datetime.now() if self.end_date == 'now' else dt.datetime.strptime(self.end_date, '%Y-%m-%d')
+        # Adjust the start date to the last trading day if the current time is outside of trading hours
         start_date = self.get_adjusted_date() if self.end_date == 'now' else start_date
         remaining_bars = self.num_bars
         while remaining_bars > 0:
@@ -275,38 +298,50 @@ class PolygonQChart(QtChart):
         print(f"Data fetched for {symbol}: {'Success' if success else 'Failed'}")
         return success
     
+    # Callback for when a symbol is searched
     async def on_search(self, chart, searched_string):
         print(f"Search triggered for {searched_string}")
+        # Save the drawings for the previous symbol
         chart.toolbox.save_drawings_under(chart.topbar['symbol'])
+        # Clear the drawings for the new symbol
         chart.topbar['security'].set(self.identify_financial_instrument(searched_string))
         cleaned_string = re.sub(r'[\^\-]', '', searched_string)
         chart.topbar['symbol'].set(cleaned_string if await self._polygon(cleaned_string) else '')
         self.precision(5 if chart.topbar['security'].value == 'Forex' else 2)
+        # Load the drawings for the new symbol
         chart.toolbox.load_drawings(chart.topbar['symbol'].value)
 
+    # Callback for when the timeframe selection is changed, fetches new data
     async def _on_timeframe_selection(self, chart):
         print("Timeframe selection changed")
         await self._polygon(chart.topbar['symbol'].value) if chart.topbar['symbol'].value else None
 
+    # Callback for when the operation selection (buy/sell) is changed
     async def _on_operation_selection(self, chart):
         print("Operation selection changed")
 
+    # Callback for when the quantity textbox is changed
     async def _on_quantity_textbox(self, chart):
         print("Quantity textbox changed")
         quantity = chart.topbar['quantity'].value
         if quantity:
             print(f"Quantity: {quantity}")
 
+    # Callback for when the market order button is clicked
     async def _on_market_order(self, chart):
         print("Market order button clicked")
         quantity = chart.topbar['quantity'].value
         operation = chart.topbar['order'].value
+
+        # Check if all required fields are filled
         if not chart.topbar['symbol'].value:
             print("No symbol selected")
             return
         if not quantity:
             print("No quantity entered")
             return
+        
+        # Create the contract based on the security type
         if chart.topbar['security'].value == 'Stock':
             contract = Stock(chart.topbar['symbol'].value, 'SMART', 'USD')
             
@@ -331,11 +366,12 @@ class PolygonQChart(QtChart):
         elif chart.topbar['security'].value == 'Index':
             contract = Index(chart.topbar['symbol'].value)
 
+        # Place the market order
         if contract:
             market_order = MarketOrder(operation, quantity, account = self.account)
             market_trade = self.ib.placeOrder(contract, market_order)
 
-
+    # Extract the multiplier and timespan from the timeframe
     def _convert_timeframe(self, timeframe):
         spans = {
             'min': 'minute',
@@ -352,6 +388,7 @@ class PolygonQChart(QtChart):
         timespan = spans[timeframe.replace(multiplier, '')]
         return multiplier, timespan
     
+    # Convert UTC to EST
     def convert_to_est(self, utc_datetime):
         utc_zone = pytz.timezone('UTC')
         est_zone = pytz.timezone('America/New_York')
@@ -359,6 +396,7 @@ class PolygonQChart(QtChart):
         est_datetime = utc_datetime.astimezone(est_zone)
         return est_datetime
     
+    # Adjust the date to the last trading day if the current time is outside of trading hours
     def get_adjusted_date(self):
         current_utc = dt.datetime.utcnow()
         current_est = self.convert_to_est(current_utc)
@@ -369,6 +407,7 @@ class PolygonQChart(QtChart):
             return current_est.date()
         return current_est.date()
     
+    # Identify the financial instrument based on the input string
     def identify_financial_instrument(self, input_string):
         # Check for Index
         if input_string.startswith('^'):

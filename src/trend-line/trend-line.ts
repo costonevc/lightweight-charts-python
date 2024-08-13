@@ -108,6 +108,7 @@ export class TrendLine extends TwoPointDrawing {
         return distance <= tolerance
     }
 
+    // Changed here, listen for mouse up events, save drawings after mouse up
     protected _childHandleMouseUpInteraction = () => {
         this._handleMouseUpInteraction();
         this.saveDrawings();

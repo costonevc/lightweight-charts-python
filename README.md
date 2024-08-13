@@ -105,6 +105,29 @@ For an isolated package installation, it's recommended to create and activate a 
 
 - Logs messages when horizontal lines are added, updated, or removed.
 
+## TypeScript Changes
+
+- Significant modifications made in the TypeScript source code are annotated with "Changed here" comments for easy identification.
+
+- After modifying TypeScript files, please compile them to JavaScript using the following command:
+
+  ```bash
+  npx rollup -c
+  ```
+
+- Modify the `rollup.config.js` to change the output location of the compiled JavaScript files if necessary (or you need to manually move `bundle.js` from dist/ to lightweight_charts/js/). For debugging, adjust the `plugins` section to beautify the output, which helps in pinpointing the location of bugs:
+
+  ```bash
+  plugins: [
+    typescript(),
+    terser({
+      format: {
+        beautify: true,
+      },
+    })
+  ]
+  ```
+
 ## References
 [Trading View](https://tradingview.github.io/lightweight-charts/docs/api)
 

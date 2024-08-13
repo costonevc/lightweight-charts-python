@@ -102,20 +102,24 @@ export class DrawingTool {
             // this._activeDrawing = new this._drawingType(point, point);
             // this._series.attachPrimitive(this._activeDrawing);
             if (this._drawingType == HorizontalLine) {
-                let update = false
+                let update = false 
                 const result = await window.pythonObject.handleHorizontalLineOrder(point.price, '', 0, update);
                 const data = JSON.parse(result);
     
                 const { orderId, permId, clientId, operation} = data;
                 // console.log('order id:', orderId, 'perm id:', permId, 'client id:', clientId, 'operation:', operation);
+
+                // update the point with the order information
                 point.orderId = orderId;
                 point.permId = permId;
                 point.clientId = clientId;
                 point.operation = operation;
 
                 const operationColor = point.operation === 'Buy' ? 'rgba(72, 222, 14, 1)' : point.operation === 'Sell' ? 'rgba(181, 9, 17, 1)' : '#1E80F0';
-
+                // create the horizontal line
                 this._activeDrawing = new this._drawingType(point, point, this.saveDrawings);
+                
+                // apply the color and text to the horizontal line
                 this._activeDrawing.applyOptions({lineColor: operationColor});
                 let formattedPrice = point.price.toFixed(2);
                 this._activeDrawing.applyOptions({text: `${point.operation} ${point.quantity} @ ${formattedPrice}`});
